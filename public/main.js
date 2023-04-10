@@ -39,7 +39,7 @@ function createCharts(nodeName) {
     const powerCanvas = createCanvas(`${nodeName}-power`);
 
     charts[nodeName] = {
-        voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
+        voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)',190,250),
         ampere: createChart(ampereCanvas, 'Ampere', 'A', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)'),
         phaseAngle: createChart(phaseAngleCanvas, 'Phase Angle', '°', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
         power: createChart(powerCanvas, 'Power', 'W', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)'),
@@ -53,7 +53,7 @@ function createCanvas(parentId) {
     return canvas;
 }
 
-function createChart(canvas, label, unit, backgroundColor, borderColor) {
+function createChart(canvas, label, unit, backgroundColor, borderColor, minY = undefined, maxY = undefined) {
     const ctx = canvas.getContext('2d');
     return new Chart(ctx, {
         type: 'line',
@@ -76,7 +76,9 @@ function createChart(canvas, label, unit, backgroundColor, borderColor) {
                     },
                 },
                 y: {
-                    beginAtZero: true,
+                    beginAtZero: minY === undefined,
+                    min: minY,
+                    max: maxY,
                 },
             },
         },
