@@ -19,6 +19,14 @@ const port = process.env.PORT || 3000;
 
 app.use(express.static(__dirname + '/public'));
 
+// Add this after your app.use() line
+app.get('/historicalData', (req, res) => {
+    // Replace the following line with a call to the readHistoricalData function
+    // once you've implemented it as described in the previous response
+    const historicalData = []; // Example: readHistoricalData()
+    res.json(historicalData);
+});
+
 http.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });

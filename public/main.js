@@ -2,6 +2,36 @@ const socket = io();
 
 const charts = {};
 
+async function fetchHistoricalData() {
+    try {
+        const response = await fetch('/historicalData');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching historical data:', error);
+        return [];
+    }
+}
+
+function renderHistoricalData(data) {
+    data.forEach(item => {
+        const { nodeName, voltage, ampere, phaseAngle, power, timestamp } = item;
+
+        if (!nodeName || typeof voltage === 'undefined' || typeof ampere === 'undefined' || typeof phaseAngle === 'undefined' || typeof power === 'undefined') {
+            console.error('Invalid historical data item:', item);
+            return;
+        }
+
+        if (!charts[nodeName]) {
+            createCharts(nodeName);
+        }
+        updateCharts(nodeName, voltage, ampere, phaseAngle, power, new Date(timestamp));
+    });
+}
+
 socket.on('mqttData', (data) => {
     try {
         const { nodeName, voltage, ampere, phaseAngle, power } = data;
@@ -14,12 +44,16 @@ socket.on('mqttData', (data) => {
         if (!charts[nodeName]) {
             createCharts(nodeName);
         }
-        updateCharts(nodeName, voltage, ampere, phaseAngle, power);
+        updateCharts(nodeName, voltage, ampere, phaseAngle, power, new Date());
     } catch (error) {
         console.error('Error processing data:', error);
     }
 });
 
+(async () => {
+    const historicalData = await fetchHistoricalData();
+    renderHistoricalData(historicalData);
+})();
 
 function createCharts(nodeName) {
     const container = document.createElement('div');
@@ -68,6 +102,9 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
             }],
         },
         options: {
+            animation: {
+                duration: 0, // Disable animations by setting duration to 0
+            },
             scales: {
                 x: {
                     type: 'time',
@@ -85,26 +122,41 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power) {
-    const timestamp = new Date();
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp) {
+    const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
+    if (voltageChart.data.labels.length >= maxDataPoints) {
+        voltageChart.data.labels.shift();
+        voltageChart.data.datasets[0].data.shift();
+    }
     voltageChart.data.labels.push(timestamp);
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
 
     const ampereChart = charts[nodeName].ampere;
+    if (ampereChart.data.labels.length >= maxDataPoints) {
+        ampereChart.data.labels.shift();
+        ampereChart.data.datasets[0].data.shift();
+    }
     ampereChart.data.labels.push(timestamp);
     ampereChart.data.datasets[0].data.push(ampere);
     ampereChart.update();
 
     const phaseAngleChart = charts[nodeName].phaseAngle;
+    if (phaseAngleChart.data.labels.length >= maxDataPoints) {
+        phaseAngleChart.data.labels.shift();
+        phaseAngleChart.data.datasets[0].data.shift();
+    }
     phaseAngleChart.data.labels.push(timestamp);
     phaseAngleChart.data.datasets[0].data.push(phaseAngle);
     phaseAngleChart.update();
 
     const powerChart = charts[nodeName].power;
+    if (powerChart.data.labels.length >= maxDataPoints) {
+        powerChart.data.labels.shift();
+        powerChart.data.datasets[0].data.shift();
+    }
     powerChart.data.labels.push(timestamp);
     powerChart.data.datasets[0].data.push(power);
     powerChart.update();
