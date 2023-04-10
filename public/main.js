@@ -3,36 +3,58 @@ const socket = io();
 const charts = {};
 
 socket.on('mqttData', (data) => {
-    const { nodeName, voltage, ampere, phaseAngle, power } = data;
+    try {
+        const { nodeName, voltage, ampere, phaseAngle, power } = data;
 
-    if (!charts[nodeName]) {
-        createCharts(nodeName);
+        if (!nodeName || typeof voltage === 'undefined' || typeof ampere === 'undefined' || typeof phaseAngle === 'undefined' || typeof power === 'undefined') {
+            console.error('Invalid data received:', data);
+            return;
+        }
+
+        if (!charts[nodeName]) {
+            createCharts(nodeName);
+        }
+        updateCharts(nodeName, voltage, ampere, phaseAngle, power);
+    } catch (error) {
+        console.error('Error processing data:', error);
     }
-    updateCharts(nodeName, voltage, ampere, phaseAngle, power);
 });
+
 
 function createCharts(nodeName) {
     const container = document.createElement('div');
     container.className = 'chart-container';
     container.innerHTML = `
         <h2>${nodeName}</h2>
-        <canvas id="${nodeName}-voltage"></canvas>
-        <canvas id="${nodeName}-ampere"></canvas>
-        <canvas id="${nodeName}-phase-angle"></canvas>
-        <canvas id="${nodeName}-power"></canvas>
+        <div id="${nodeName}-voltage" class="chart"></div>
+        <div id="${nodeName}-ampere" class="chart"></div>
+        <div id="${nodeName}-phase-angle" class="chart"></div>
+        <div id="${nodeName}-power" class="chart"></div>
     `;
     document.getElementById('charts-container').appendChild(container);
 
+    const voltageCanvas = createCanvas(`${nodeName}-voltage`);
+    const ampereCanvas = createCanvas(`${nodeName}-ampere`);
+    const phaseAngleCanvas = createCanvas(`${nodeName}-phase-angle`);
+    const powerCanvas = createCanvas(`${nodeName}-power`);
+
     charts[nodeName] = {
-        voltage: createChart(`${nodeName}-voltage`, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
-        ampere: createChart(`${nodeName}-ampere`, 'Ampere', 'A', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)'),
-        phaseAngle: createChart(`${nodeName}-phase-angle`, 'Phase Angle', '°', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
-        power: createChart(`${nodeName}-power`, 'Power', 'W', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)'),
+        voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
+        ampere: createChart(ampereCanvas, 'Ampere', 'A', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)'),
+        phaseAngle: createChart(phaseAngleCanvas, 'Phase Angle', '°', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
+        power: createChart(powerCanvas, 'Power', 'W', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)'),
     };
 }
 
-function createChart(elementId, label, unit, backgroundColor, borderColor) {
-    const ctx = document.getElementById(elementId).getContext('2d');
+function createCanvas(parentId) {
+    const parent = document.getElementById(parentId);
+    const canvas = document.createElement('canvas');
+    parent.appendChild(canvas);
+    return canvas;
+}
+
+function createChart(canvas, label, unit, backgroundColor, borderColor) {
+    const ctx = canvas.getContext('2d');
     return new Chart(ctx, {
         type: 'line',
         data: {
@@ -60,6 +82,7 @@ function createChart(elementId, label, unit, backgroundColor, borderColor) {
         },
     });
 }
+
 
 function updateCharts(nodeName, voltage, ampere, phaseAngle, power) {
     const timestamp = new Date();
