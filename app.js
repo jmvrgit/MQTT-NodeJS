@@ -23,7 +23,11 @@ app.post('/login', passport.authenticate('local', {
 
 // Serve index.html for the /home route
 app.get('/home', auth.ensureAuthenticated, (req, res) => {
-    res.sendFile('index.html', { root: __dirname + '/public' });
+    res.sendFile('nodes.html', { root: __dirname + '/public' });
+});
+
+app.get('/', auth.ensureAuthenticated, (req, res) => {
+    res.sendFile('login.html', { root: __dirname + '/public' });
 });
 
 // Serve login.html for the /login route
