@@ -49,7 +49,8 @@ http.listen(port, () => {
 
 const mqtt = require('mqtt');
 
-const mqttBroker = 'mqtt://localhost:1883';
+const mqttBroker = 'mqtt://host.docker.internal:1883';
+// const mqttBroker = 'mqtt://localhost:1883';
 const topic = 'powerdata';
 
 const mqttClient = mqtt.connect(mqttBroker);
