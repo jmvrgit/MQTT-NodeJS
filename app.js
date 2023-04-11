@@ -1,23 +1,35 @@
-const mqtt = require('mqtt');
-
-const mqttBroker = 'mqtt://localhost:1883';
-const topic = 'powerdata';
-
-const mqttClient = mqtt.connect(mqttBroker);
-
-mqttClient.on('connect', () => {
-    console.log('Connected to MQTT broker');
-    mqttClient.subscribe(topic);
-});
-
-
+const passport = require('passport');
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('public', {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    }
+  }));
+  
+// Require and use the auth.js file
+const auth = require('./auth')(app);
+
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/home',
+    failureRedirect: '/login'
+}));
+
+// Serve index.html for the /home route
+app.get('/home', auth.ensureAuthenticated, (req, res) => {
+    res.sendFile('index.html', { root: __dirname + '/public' });
+});
+
+// Serve login.html for the /login route
+app.get('/login', (req, res) => {
+    res.sendFile('login.html', { root: __dirname + '/public' });
+});
 
 // Add this after your app.use() line
 app.get('/historicalData', (req, res) => {
@@ -29,6 +41,18 @@ app.get('/historicalData', (req, res) => {
 
 http.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
+});
+
+const mqtt = require('mqtt');
+
+const mqttBroker = 'mqtt://localhost:1883';
+const topic = 'powerdata';
+
+const mqttClient = mqtt.connect(mqttBroker);
+
+mqttClient.on('connect', () => {
+    console.log('Connected to MQTT broker');
+    mqttClient.subscribe(topic);
 });
 
 
