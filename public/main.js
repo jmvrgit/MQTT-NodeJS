@@ -32,6 +32,8 @@ function renderHistoricalData(data) {
     });
 }
 
+const lastReceivedData = new Map();
+
 socket.on('mqttData', (data) => {
     try {
         const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3 } = data;
@@ -44,20 +46,49 @@ socket.on('mqttData', (data) => {
         if (!charts[nodeName]) {
             createCharts(nodeName);
         }
+
+        lastReceivedData.set(nodeName, new Date());
         updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date());
     } catch (error) {
         console.error('Error processing data:', error);
     }
 });
 
+function updateChartContainerBorder() {
+    const oneMinute = 3000; // three seconds
+    const tenMinutes = 2 * oneMinute;
+
+    lastReceivedData.forEach((lastTimestamp, nodeName) => {
+        const now = new Date();
+        const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
+        const nodeNameElement = container.querySelector('h2');
+
+        if (now - lastTimestamp >= tenMinutes) {
+            container.style.border = '2px solid grey';
+            nodeNameElement.innerHTML = `${nodeName} (Disconnected)`;
+        } else if (now - lastTimestamp >= oneMinute) {
+            container.style.border = '2px solid red';
+            nodeNameElement.innerHTML = nodeName;
+        } else {
+            container.style.border = '2px solid green';
+            nodeNameElement.innerHTML = nodeName;
+        }
+    });
+}
+
+
 (async () => {
     const historicalData = await fetchHistoricalData();
     renderHistoricalData(historicalData);
 })();
 
+setInterval(updateChartContainerBorder, 1000);
+
 function createCharts(nodeName) {
     const container = document.createElement('div');
     container.className = 'chart-container';
+    container.setAttribute('data-node-name', nodeName);
+
     container.innerHTML = `
         <h2>${nodeName}</h2>
         <div id="${nodeName}-voltage" class="chart"></div>
