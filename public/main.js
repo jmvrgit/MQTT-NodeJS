@@ -18,9 +18,9 @@ async function fetchHistoricalData() {
 
 function renderHistoricalData(data) {
     data.forEach(item => {
-        const { nodeName, voltage, ampere, phaseAngle, power, timestamp } = item;
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, timestamp } = item;
 
-        if (!nodeName || typeof voltage === 'undefined' || typeof ampere === 'undefined' || typeof phaseAngle === 'undefined' || typeof power === 'undefined') {
+        if (!nodeName || typeof voltage === 'undefined') {
             console.error('Invalid historical data item:', item);
             return;
         }
@@ -28,15 +28,15 @@ function renderHistoricalData(data) {
         if (!charts[nodeName]) {
             createCharts(nodeName);
         }
-        updateCharts(nodeName, voltage, ampere, phaseAngle, power, new Date(timestamp));
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(timestamp));
     });
 }
 
 socket.on('mqttData', (data) => {
     try {
-        const { nodeName, voltage, ampere, phaseAngle, power } = data;
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3 } = data;
 
-        if (!nodeName || typeof voltage === 'undefined' || typeof ampere === 'undefined' || typeof phaseAngle === 'undefined' || typeof power === 'undefined') {
+        if (!nodeName || typeof voltage === 'undefined') {
             console.error('Invalid data received:', data);
             return;
         }
@@ -44,7 +44,7 @@ socket.on('mqttData', (data) => {
         if (!charts[nodeName]) {
             createCharts(nodeName);
         }
-        updateCharts(nodeName, voltage, ampere, phaseAngle, power, new Date());
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date());
     } catch (error) {
         console.error('Error processing data:', error);
     }
@@ -61,22 +61,46 @@ function createCharts(nodeName) {
     container.innerHTML = `
         <h2>${nodeName}</h2>
         <div id="${nodeName}-voltage" class="chart"></div>
-        <div id="${nodeName}-ampere" class="chart"></div>
-        <div id="${nodeName}-phase-angle" class="chart"></div>
-        <div id="${nodeName}-power" class="chart"></div>
+        <div id="${nodeName}-ampere1" class="chart"></div>
+        <div id="${nodeName}-ampere2" class="chart"></div>
+        <div id="${nodeName}-ampere3" class="chart"></div>
+        <div id="${nodeName}-phase-angle1" class="chart"></div>
+        <div id="${nodeName}-phase-angle2" class="chart"></div>
+        <div id="${nodeName}-phase-angle3" class="chart"></div>
+        <div id="${nodeName}-power1" class="chart"></div>
+        <div id="${nodeName}-power2" class="chart"></div>
+        <div id="${nodeName}-power3" class="chart"></div>
     `;
     document.getElementById('charts-container').appendChild(container);
 
     const voltageCanvas = createCanvas(`${nodeName}-voltage`);
-    const ampereCanvas = createCanvas(`${nodeName}-ampere`);
-    const phaseAngleCanvas = createCanvas(`${nodeName}-phase-angle`);
-    const powerCanvas = createCanvas(`${nodeName}-power`);
+    const ampereCanvas1 = createCanvas(`${nodeName}-ampere1`);
+    const ampereCanvas2 = createCanvas(`${nodeName}-ampere2`);
+    const ampereCanvas3 = createCanvas(`${nodeName}-ampere3`);
+    const phaseAngleCanvas1 = createCanvas(`${nodeName}-phase-angle1`);
+    const phaseAngleCanvas2 = createCanvas(`${nodeName}-phase-angle2`);
+    const phaseAngleCanvas3 = createCanvas(`${nodeName}-phase-angle3`);
+    const powerCanvas1 = createCanvas(`${nodeName}-power1`);
+    const powerCanvas2 = createCanvas(`${nodeName}-power2`);
+    const powerCanvas3 = createCanvas(`${nodeName}-power3`);
 
     charts[nodeName] = {
-        voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)',190,250),
-        ampere: createChart(ampereCanvas, 'Ampere', 'A', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)'),
-        phaseAngle: createChart(phaseAngleCanvas, 'Phase Angle', '°', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
-        power: createChart(powerCanvas, 'Power', 'W', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)'),
+        voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)', 190, 250),
+        ampere: [
+            createChart(ampereCanvas1, 'Ampere 1', 'A', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)'),
+            createChart(ampereCanvas2, 'Ampere 2', 'A', 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)'),
+            createChart(ampereCanvas3, 'Ampere 3', 'A', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)'),
+        ],
+        phaseAngle: [
+            createChart(phaseAngleCanvas1, 'Phase Angle 1', '°', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
+            createChart(phaseAngleCanvas2, 'Phase Angle 2', '°', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)'),
+            createChart(phaseAngleCanvas3, 'Phase Angle 3', '°', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
+        ], 
+        power: [
+            createChart(powerCanvas1, 'Power 1', 'W', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
+            createChart(powerCanvas2, 'Power 2', 'W', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)'),
+            createChart(powerCanvas3, 'Power 3', 'W', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
+    ],
     };
 }
 
@@ -134,30 +158,33 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp) {
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
 
-    const ampereChart = charts[nodeName].ampere;
-    if (ampereChart.data.labels.length >= maxDataPoints) {
-        ampereChart.data.labels.shift();
-        ampereChart.data.datasets[0].data.shift();
-    }
-    ampereChart.data.labels.push(timestamp);
-    ampereChart.data.datasets[0].data.push(ampere);
-    ampereChart.update();
+    charts[nodeName].ampere.forEach((ampereChart, index) => {
+        if (ampereChart.data.labels.length >= maxDataPoints) {
+            ampereChart.data.labels.shift();
+            ampereChart.data.datasets[0].data.shift();
+        }
+        ampereChart.data.labels.push(timestamp);
+        ampereChart.data.datasets[0].data.push(ampere[index]);
+        ampereChart.update();
+    });
 
-    const phaseAngleChart = charts[nodeName].phaseAngle;
-    if (phaseAngleChart.data.labels.length >= maxDataPoints) {
-        phaseAngleChart.data.labels.shift();
-        phaseAngleChart.data.datasets[0].data.shift();
-    }
-    phaseAngleChart.data.labels.push(timestamp);
-    phaseAngleChart.data.datasets[0].data.push(phaseAngle);
-    phaseAngleChart.update();
+    charts[nodeName].phaseAngle.forEach((phaseAngleChart, index) => {
+        if (phaseAngleChart.data.labels.length >= maxDataPoints) {
+            phaseAngleChart.data.labels.shift();
+            phaseAngleChart.data.datasets[0].data.shift();
+        }
+        phaseAngleChart.data.labels.push(timestamp);
+        phaseAngleChart.data.datasets[0].data.push(phaseAngle[index]);
+        phaseAngleChart.update();
+    });
 
-    const powerChart = charts[nodeName].power;
-    if (powerChart.data.labels.length >= maxDataPoints) {
-        powerChart.data.labels.shift();
-        powerChart.data.datasets[0].data.shift();
-    }
-    powerChart.data.labels.push(timestamp);
-    powerChart.data.datasets[0].data.push(power);
-    powerChart.update();
+    charts[nodeName].power.forEach((powerChart, index) => {
+        if (powerChart.data.labels.length >= maxDataPoints) {
+            powerChart.data.labels.shift();
+            powerChart.data.datasets[0].data.shift();
+        }
+        powerChart.data.labels.push(timestamp);
+        powerChart.data.datasets[0].data.push(power[index]);
+        powerChart.update();
+    });
 }
