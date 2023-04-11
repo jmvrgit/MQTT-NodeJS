@@ -91,6 +91,8 @@ function createCharts(nodeName) {
 
     container.innerHTML = `
         <h2>${nodeName}</h2>
+        <label for="${nodeName}-relay">Relay Control: </label>
+        <input type="checkbox" id="${nodeName}-relay" class="relay-control" data-node-name="${nodeName}">
         <div id="${nodeName}-voltage" class="chart"></div>
         <div id="${nodeName}-ampere1" class="chart"></div>
         <div id="${nodeName}-ampere2" class="chart"></div>
@@ -133,6 +135,28 @@ function createCharts(nodeName) {
             createChart(powerCanvas3, 'Power 3', 'W', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
     ],
     };
+
+    const relaySwitch = container.querySelector(`#${nodeName}-relay`);
+    relaySwitch.addEventListener('change', async (event) => {
+    const relayStatusON = event.target.checked;
+    const data = { nodeName, relayStatusON };
+
+    try {
+        const response = await fetch(`/relaycontrols/${nodeName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error sending relay control:', error);
+    }
+});
 }
 
 function createCanvas(parentId) {
@@ -218,4 +242,21 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp) {
         powerChart.data.datasets[0].data.push(power[index]);
         powerChart.update();
     });
+}
+
+document.addEventListener('change', (event) => {
+    const target = event.target;
+    if (target.classList.contains('relay-control')) {
+        const nodeName = target.getAttribute('data-node-name');
+        const relayStatusON = target.checked;
+        sendRelayControl(nodeName, relayStatusON);
+    }
+});
+
+function sendRelayControl(nodeName, relayStatusON) {
+    const data = {
+        nodeName: nodeName,
+        relayStatusON: relayStatusON,
+    };
+    socket.emit('relayControl', data);
 }

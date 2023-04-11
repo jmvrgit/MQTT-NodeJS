@@ -36,3 +36,23 @@ mqttClient.on('message', (topic, message) => {
     const data = JSON.parse(message);
     io.emit('mqttData', data);
 });
+
+app.use(express.json());
+app.post('/relaycontrols/:nodeName', (req, res) => {
+    const { nodeName } = req.params;
+    const { relayStatusON } = req.body;
+
+    console.log(`Relay control for ${nodeName}:`, relayStatusON);
+    const relayTopic = `/relaycontrols/${nodeName}`;
+    const relayPayload = JSON.stringify({ nodeName, relayStatusON });
+
+    mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
+        if (err) {
+            console.error(`Error publishing to ${relayTopic}:`, err);
+            res.sendStatus(500);
+        } else {
+            console.log(`Published to ${relayTopic}:`, relayPayload);
+            res.sendStatus(200);
+        }
+    });
+});
