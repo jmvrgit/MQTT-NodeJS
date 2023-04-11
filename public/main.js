@@ -201,7 +201,7 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatusON) {
     const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
@@ -242,7 +242,13 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp) {
         powerChart.data.datasets[0].data.push(power[index]);
         powerChart.update();
     });
+    
+    const relaySwitch = document.querySelector(`#${nodeName}-relay`);
+    if (relaySwitch) {
+        relaySwitch.checked = relayStatusON;
+    }
 }
+
 
 document.addEventListener('change', (event) => {
     const target = event.target;
@@ -260,3 +266,23 @@ function sendRelayControl(nodeName, relayStatusON) {
     };
     socket.emit('relayControl', data);
 }
+
+socket.on('mqttData', (data) => {
+    try {
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relayStatusON } = data;
+
+        if (!nodeName || typeof voltage === 'undefined') {
+            console.error('Invalid data received:', data);
+            return;
+        }
+
+        if (!charts[nodeName]) {
+            createCharts(nodeName);
+        }
+
+        lastReceivedData.set(nodeName, new Date());
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), relayStatusON);
+    } catch (error) {
+        console.error('Error processing data:', error);
+    }
+});
