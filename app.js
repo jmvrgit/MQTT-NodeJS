@@ -32,7 +32,7 @@ app.get('/login', (req, res) => {
 });
 
 // Add this after your app.use() line
-app.get('/historicalData', (req, res) => {
+app.get('/historicalData', auth.ensureAuthenticated, (req, res) => {
     // Replace the following line with a call to the readHistoricalData function
     // once you've implemented it as described in the previous response
     const historicalData = []; // Example: readHistoricalData()
