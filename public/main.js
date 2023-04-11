@@ -34,26 +34,6 @@ function renderHistoricalData(data) {
 
 const lastReceivedData = new Map();
 
-socket.on('mqttData', (data) => {
-    try {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3 } = data;
-
-        if (!nodeName || typeof voltage === 'undefined') {
-            console.error('Invalid data received:', data);
-            return;
-        }
-
-        if (!charts[nodeName]) {
-            createCharts(nodeName);
-        }
-
-        lastReceivedData.set(nodeName, new Date());
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date());
-    } catch (error) {
-        console.error('Error processing data:', error);
-    }
-});
-
 function updateChartContainerBorder() {
     const oneMinute = 3000; // three seconds
     const tenMinutes = 2 * oneMinute;
@@ -92,6 +72,7 @@ function createCharts(nodeName) {
     container.innerHTML = `
         <h2>${nodeName}</h2>
         <label for="${nodeName}-relay">Relay Control: </label>
+        <p>Status: ${status}</p>
         <input type="checkbox" id="${nodeName}-relay" class="relay-control" data-node-name="${nodeName}">
         <div id="${nodeName}-voltage" class="chart"></div>
         <div id="${nodeName}-ampere1" class="chart"></div>
@@ -201,7 +182,7 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatusON) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatusON, status) {
     const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
@@ -247,6 +228,10 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, r
     if (relaySwitch) {
         relaySwitch.checked = relayStatusON;
     }
+    const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
+    const statusElement = container.querySelector('p');
+    statusElement.innerHTML = `Status: ${status}`;
+
 }
 
 
@@ -269,7 +254,7 @@ function sendRelayControl(nodeName, relayStatusON) {
 
 socket.on('mqttData', (data) => {
     try {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relayStatusON } = data;
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relayStatusON, status } = data;
 
         if (!nodeName || typeof voltage === 'undefined') {
             console.error('Invalid data received:', data);
@@ -281,7 +266,7 @@ socket.on('mqttData', (data) => {
         }
 
         lastReceivedData.set(nodeName, new Date());
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), relayStatusON);
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), relayStatusON, status);
     } catch (error) {
         console.error('Error processing data:', error);
     }
