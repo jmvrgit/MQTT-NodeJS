@@ -47,7 +47,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
     try {
         const user = await pb.collection('users').getOne(id);
-        console.log('Deserialized user:', user); // Add this line to log the user object
+        //console.log('Deserialized user:', user); // Add this line to log the user object
         done(null, user);
     } catch (error) {
         done(error, null);
@@ -63,7 +63,7 @@ app.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
     try {
         const authData = await pb.collection('users').authWithPassword(username, password);
-        console.log('Auth data:', authData);
+        //console.log('Auth data:', authData);
         req.login(authData, (err) => { // Change authData.model to authData
             if (err) {
                 return next(err);
@@ -100,13 +100,39 @@ app.get('/login', (req, res) => {
     res.sendFile('login.html', { root: __dirname + '/public' });
 });
 
-// Add this after your app.use() line
-app.get('/historicalData', ensureAuthenticated, (req, res) => {
-    // Replace the following line with a call to the readHistoricalData function
-    // once you've implemented it as described in the previous response
-    const historicalData = []; // Example: readHistoricalData()
-    res.json(historicalData);
+app.get('/historicalData', ensureAuthenticated, async (req, res) => {
+    try {
+        // Fetch all unique nodes
+        const uniqueNodes = await pb.collection('powerdata').getFullList(1,20);
+
+        // Initialize an empty array to store the last 20 data points for each unique node
+        const historicalData = [];
+
+        // Calculate the timestamp for 10 seconds ago
+        const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
+
+        // Fetch the last 20 data points for each unique node
+        for (const node of uniqueNodes) {
+            const nodeData = await pb.collection('powerdata').getList(1, 20);
+
+            // Filter the node data based on the timestamp
+            const filteredNodeData = nodeData.items.filter(item => {
+                const itemCreated = new Date(item.created);
+                return itemCreated >= tenSecondsAgo;
+            });
+
+            // Add the filtered node data to the historicalData array
+            historicalData.push(...filteredNodeData);
+        }
+
+        // Return the historical data as a JSON response
+        res.json(historicalData);
+    } catch (error) {
+        console.error('Error fetching historical data:', error.stack);
+        res.status(500).json({ error: 'Failed to fetch historical data' });
+    }
 });
+
 
 http.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
