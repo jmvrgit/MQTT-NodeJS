@@ -271,3 +271,23 @@ socket.on('mqttData', (data) => {
         console.error('Error processing data:', error);
     }
 });
+
+document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Redirect to the login page after successful logout
+        window.location.href = '/login';
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+});

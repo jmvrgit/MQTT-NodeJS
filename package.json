@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --experimental-modules app.mjs"
   },
   "keywords": [],
   "author": "",
@@ -12,10 +13,11 @@
   "dependencies": {
     "chart.js": "^4.2.1",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "mqtt": "^4.3.7",
-    "socket.io": "^4.6.1",
-	"passport": "^0.6.0",
-	"passport-local": "^1.0.0",
-	"express-session": "^1.17.3"
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "pocketbase": "^0.13.1",
+    "socket.io": "^4.6.1"
   }
 }
