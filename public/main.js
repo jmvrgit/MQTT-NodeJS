@@ -72,19 +72,26 @@ function createCharts(nodeName) {
     container.innerHTML = `
         <h2>${nodeName}</h2>
         <label for="${nodeName}-relay">Relay Control: </label>
-        <p>Status: ${status}</p>
         <input type="checkbox" id="${nodeName}-relay" class="relay-control" data-node-name="${nodeName}">
+        <p>Status: ${status}</p>
         <div id="${nodeName}-voltage" class="chart"></div>
-        <div id="${nodeName}-ampere1" class="chart"></div>
-        <div id="${nodeName}-ampere2" class="chart"></div>
-        <div id="${nodeName}-ampere3" class="chart"></div>
-        <div id="${nodeName}-phase-angle1" class="chart"></div>
-        <div id="${nodeName}-phase-angle2" class="chart"></div>
-        <div id="${nodeName}-phase-angle3" class="chart"></div>
-        <div id="${nodeName}-power1" class="chart"></div>
-        <div id="${nodeName}-power2" class="chart"></div>
-        <div id="${nodeName}-power3" class="chart"></div>
+        <div class="group">
+            <div id="${nodeName}-ampere1" class="chart"></div>
+            <div id="${nodeName}-phase-angle1" class="chart"></div>
+            <div id="${nodeName}-power1" class="chart"></div>
+        </div>
+        <div class="group">
+            <div id="${nodeName}-ampere2" class="chart"></div>
+            <div id="${nodeName}-phase-angle2" class="chart"></div>
+            <div id="${nodeName}-power2" class="chart"></div>
+        </div>
+        <div class="group">
+            <div id="${nodeName}-ampere3" class="chart"></div>
+            <div id="${nodeName}-phase-angle3" class="chart"></div>
+            <div id="${nodeName}-power3" class="chart"></div>
+        </div>
     `;
+
     document.getElementById('charts-container').appendChild(container);
 
     const voltageCanvas = createCanvas(`${nodeName}-voltage`);

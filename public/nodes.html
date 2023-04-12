@@ -10,26 +10,40 @@
 
     
     <style>
-        #charts-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-
-        .chart-container {
-            width: 350px;
+        
+        h1 {
+            background-color: #4CAF50;
+            color: white;
             padding: 1rem;
-            border: 2px solid green;
-            margin: 0.5rem;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        .chart {
-            width: 100%;
-            height: 150px;
             margin-bottom: 2rem;
         }
+        
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid green;
+            padding: 1rem;
+            margin: 1rem;
+        }
+        
+        .group {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .chart {
+            width: 30%;
+        }
     </style>
+    
     
 </head>
 <body>
