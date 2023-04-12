@@ -123,10 +123,15 @@ mqttClient.on('connect', () => {
     mqttClient.subscribe(topic);
 });
 
-
-mqttClient.on('message', (topic, message) => {
-    const data = JSON.parse(message);
-    io.emit('mqttData', data);
+mqttClient.on('message', async (topic, message) => {
+    try {
+        const data = JSON.parse(message);
+        io.emit('mqttData', data);
+        const record = await pb.collection('powerdata').create(data);
+        console.log(record);
+    } catch (error) {
+        console.error('Error processing message:', error);
+    }
 });
 
 app.use(express.json());
