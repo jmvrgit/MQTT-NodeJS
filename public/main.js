@@ -2,35 +2,35 @@ const socket = io();
 
 const charts = {};
 
-async function fetchHistoricalData() {
-    try {
-        const response = await fetch('/historicalData');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching historical data:', error);
-        return [];
-    }
-}
+// async function fetchHistoricalData() {
+//     try {
+//         const response = await fetch('/historicalData');
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! Status: ${response.status}`);
+//         }
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error('Error fetching historical data:', error);
+//         return [];
+//     }
+// }
 
-function renderHistoricalData(data) {
-    data.forEach(item => {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, timestamp } = item;
+// function renderHistoricalData(data) {
+//     data.forEach(item => {
+//         const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, timestamp } = item;
 
-        if (!nodeName || typeof voltage === 'undefined') {
-            console.error('Invalid historical data item:', item);
-            return;
-        }
+//         if (!nodeName || typeof voltage === 'undefined') {
+//             console.error('Invalid historical data item:', item);
+//             return;
+//         }
 
-        if (!charts[nodeName]) {
-            createCharts(nodeName);
-        }
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(timestamp));
-    });
-}
+//         if (!charts[nodeName]) {
+//             createCharts(nodeName);
+//         }
+//         updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(timestamp));
+//     });
+// }
 
 const lastReceivedData = new Map();
 
@@ -71,8 +71,12 @@ function createCharts(nodeName) {
 
     container.innerHTML = `
         <h2>${nodeName}</h2>
-        <label for="${nodeName}-relay">Relay Control: </label>
-        <input type="checkbox" id="${nodeName}-relay" class="relay-control" data-node-name="${nodeName}">
+        <label for="${nodeName}-relay1">Relay 1: </label>
+        <input type="checkbox" id="${nodeName}-relay1" class="relay-control" data-node-name="${nodeName}" data-relay-number="1">
+        <label for="${nodeName}-relay2">Relay 2: </label>
+        <input type="checkbox" id="${nodeName}-relay2" class="relay-control" data-node-name="${nodeName}" data-relay-number="2">
+        <label for="${nodeName}-relay3">Relay 3: </label>
+        <input type="checkbox" id="${nodeName}-relay3" class="relay-control" data-node-name="${nodeName}" data-relay-number="3">        
         <p>Status: ${status}</p>
         <div id="${nodeName}-voltage" class="chart"></div>
         <div class="group">
@@ -123,28 +127,72 @@ function createCharts(nodeName) {
             createChart(powerCanvas3, 'Power 3', 'W', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
     ],
     };
-
-    const relaySwitch = container.querySelector(`#${nodeName}-relay`);
-    relaySwitch.addEventListener('change', async (event) => {
-    const relayStatusON = event.target.checked;
-    const data = { nodeName, relayStatusON };
-
-    try {
-        const response = await fetch(`/relaycontrols/${nodeName}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-    } catch (error) {
-        console.error('Error sending relay control:', error);
-    }
-});
+    // const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
+    // const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
+    // const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
+    
+    // relaySwitch1.addEventListener('change', async (event) => {
+    //     const relay1StatusON = event.target.checked;
+    //     const data = { nodeName, relay1StatusON };
+    
+    //     try {
+    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! Status: ${response.status}`);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error sending relay control:', error);
+    //     }
+    // });
+    
+    // relaySwitch2.addEventListener('change', async (event) => {
+    //     const relay2StatusON = event.target.checked;
+    //     const data = { nodeName, relay2StatusON };
+    
+    //     try {
+    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! Status: ${response.status}`);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error sending relay control:', error);
+    //     }
+    // });
+    
+    // relaySwitch3.addEventListener('change', async (event) => {
+    //     const relay3StatusON = event.target.checked;
+    //     const data = { nodeName, relay3StatusON };
+    
+    //     try {
+    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! Status: ${response.status}`);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error sending relay control:', error);
+    //     }
+    // });
 }
 
 function createCanvas(parentId) {
@@ -189,7 +237,7 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatusON, status) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatuses, status) {
     const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
@@ -231,10 +279,12 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, r
         powerChart.update();
     });
     
-    const relaySwitch = document.querySelector(`#${nodeName}-relay`);
-    if (relaySwitch) {
-        relaySwitch.checked = relayStatusON;
-    }
+    relayStatuses.forEach((relayStatus, index) => {
+        const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
+        if (relaySwitch) {
+            relaySwitch.checked = relayStatus;
+        }
+    });
     const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
     const statusElement = container.querySelector('p');
     statusElement.innerHTML = `Status: ${status}`;
@@ -246,22 +296,25 @@ document.addEventListener('change', (event) => {
     const target = event.target;
     if (target.classList.contains('relay-control')) {
         const nodeName = target.getAttribute('data-node-name');
+        const relayNumber = parseInt(target.getAttribute('data-relay-number'), 10);
         const relayStatusON = target.checked;
-        sendRelayControl(nodeName, relayStatusON);
+        sendRelayControl(nodeName, relayNumber, relayStatusON);
     }
 });
 
-function sendRelayControl(nodeName, relayStatusON) {
+function sendRelayControl(nodeName, relayNumber, relayStatusON) {
     const data = {
         nodeName: nodeName,
+        relayNumber: relayNumber,
         relayStatusON: relayStatusON,
     };
     socket.emit('relayControl', data);
 }
 
+
 socket.on('mqttData', (data) => {
     try {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relayStatusON, status } = data;
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relay1, relay2, relay3, status } = data;
 
         if (!nodeName || typeof voltage === 'undefined') {
             console.error('Invalid data received:', data);
@@ -273,7 +326,7 @@ socket.on('mqttData', (data) => {
         }
 
         lastReceivedData.set(nodeName, new Date());
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), relayStatusON, status);
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), [relay1, relay2, relay3], status);
     } catch (error) {
         console.error('Error processing data:', error);
     }

@@ -100,38 +100,38 @@ app.get('/login', (req, res) => {
     res.sendFile('login.html', { root: __dirname + '/public' });
 });
 
-app.get('/historicalData', ensureAuthenticated, async (req, res) => {
-    try {
-        // Fetch all unique nodes
-        const uniqueNodes = await pb.collection('powerdata').getFullList(1,20);
+// app.get('/historicalData', ensureAuthenticated, async (req, res) => {
+//     try {
+//         // Fetch all unique nodes
+//         const uniqueNodes = await pb.collection('powerdata').getFullList(1,20);
 
-        // Initialize an empty array to store the last 20 data points for each unique node
-        const historicalData = [];
+//         // Initialize an empty array to store the last 20 data points for each unique node
+//         const historicalData = [];
 
-        // Calculate the timestamp for 10 seconds ago
-        const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
+//         // Calculate the timestamp for 10 seconds ago
+//         const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
 
-        // Fetch the last 20 data points for each unique node
-        for (const node of uniqueNodes) {
-            const nodeData = await pb.collection('powerdata').getList(1, 20);
+//         // Fetch the last 20 data points for each unique node
+//         for (const node of uniqueNodes) {
+//             const nodeData = await pb.collection('powerdata').getList(1, 20);
 
-            // Filter the node data based on the timestamp
-            const filteredNodeData = nodeData.items.filter(item => {
-                const itemCreated = new Date(item.created);
-                return itemCreated >= tenSecondsAgo;
-            });
+//             // Filter the node data based on the timestamp
+//             const filteredNodeData = nodeData.items.filter(item => {
+//                 const itemCreated = new Date(item.created);
+//                 return itemCreated >= tenSecondsAgo;
+//             });
 
-            // Add the filtered node data to the historicalData array
-            historicalData.push(...filteredNodeData);
-        }
+//             // Add the filtered node data to the historicalData array
+//             historicalData.push(...filteredNodeData);
+//         }
 
-        // Return the historical data as a JSON response
-        res.json(historicalData);
-    } catch (error) {
-        console.error('Error fetching historical data:', error.stack);
-        res.status(500).json({ error: 'Failed to fetch historical data' });
-    }
-});
+//         // Return the historical data as a JSON response
+//         res.json(historicalData);
+//     } catch (error) {
+//         console.error('Error fetching historical data:', error.stack);
+//         res.status(500).json({ error: 'Failed to fetch historical data' });
+//     }
+// });
 
 
 http.listen(port, () => {
@@ -163,11 +163,11 @@ mqttClient.on('message', async (topic, message) => {
 app.use(express.json());
 app.post('/relaycontrols/:nodeName', (req, res) => {
     const { nodeName } = req.params;
-    const { relayStatusON } = req.body;
+    const { relay1StatusON, relay2StatusON, relay3StatusON } = req.body;
 
-    console.log(`Relay control for ${nodeName}:`, relayStatusON);
+    console.log(`Relay control for ${nodeName}: Relay1=${relay1StatusON}, Relay2=${relay2StatusON}, Relay3=${relay3StatusON}`);
     const relayTopic = `/relaycontrols/${nodeName}`;
-    const relayPayload = JSON.stringify({ nodeName, relayStatusON });
+    const relayPayload = JSON.stringify({ nodeName, relay1StatusON, relay2StatusON, relay3StatusON });
 
     mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
         if (err) {
