@@ -314,7 +314,7 @@ function sendRelayControl(nodeName, relayNumber, relayStatusON) {
 
 socket.on('mqttData', (data) => {
     try {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, relay1, relay2, relay3, status } = data;
+        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, R1, R2, R3, status } = data;
 
         if (!nodeName || typeof voltage === 'undefined') {
             console.error('Invalid data received:', data);
@@ -326,7 +326,7 @@ socket.on('mqttData', (data) => {
         }
 
         lastReceivedData.set(nodeName, new Date());
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), [relay1, relay2, relay3], status);
+        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), [R1, R2, R3], status);
     } catch (error) {
         console.error('Error processing data:', error);
     }
