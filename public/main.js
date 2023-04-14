@@ -127,6 +127,31 @@ function createCharts(nodeName) {
             createChart(powerCanvas3, 'Power 3', 'W', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
     ],
     };
+
+        const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
+    const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
+    const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
+
+    relaySwitch1.addEventListener('change', (event) => {
+        const relay1StatusON = event.target.checked;
+        const relay2StatusON = relaySwitch2.checked;
+        const relay3StatusON = relaySwitch3.checked;
+        sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON);
+    });
+
+    relaySwitch2.addEventListener('change', (event) => {
+        const relay1StatusON = relaySwitch1.checked;
+        const relay2StatusON = event.target.checked;
+        const relay3StatusON = relaySwitch3.checked;
+        sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON);
+    });
+
+    relaySwitch3.addEventListener('change', (event) => {
+        const relay1StatusON = relaySwitch1.checked;
+        const relay2StatusON = relaySwitch2.checked;
+        const relay3StatusON = event.target.checked;
+        sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON);
+    });
     // const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
     // const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
     // const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
@@ -285,32 +310,34 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, r
             relaySwitch.checked = relayStatus;
         }
     });
+
     const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
     const statusElement = container.querySelector('p');
     statusElement.innerHTML = `Status: ${status}`;
 
 }
 
+// document.addEventListener('change', (event) => {
+//     const target = event.target;
+//     if (target.classList.contains('relay-control')) {
+//         const nodeName = target.getAttribute('data-node-name');
+//         const relayNumber = parseInt(target.getAttribute('data-relay-number'), 10);
+//         const relayStatusON = target.checked;
+//         console.log(nodeName, relayNumber, relayStatusON);
+//         sendRelayControl(nodeName, relayNumber, relayStatusON);
+//     }
+// });
 
-document.addEventListener('change', (event) => {
-    const target = event.target;
-    if (target.classList.contains('relay-control')) {
-        const nodeName = target.getAttribute('data-node-name');
-        const relayNumber = parseInt(target.getAttribute('data-relay-number'), 10);
-        const relayStatusON = target.checked;
-        sendRelayControl(nodeName, relayNumber, relayStatusON);
-    }
-});
-
-function sendRelayControl(nodeName, relayNumber, relayStatusON) {
+function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON) {
     const data = {
         nodeName: nodeName,
-        relayNumber: relayNumber,
-        relayStatusON: relayStatusON,
+        R1: relay1StatusON,
+        R2: relay2StatusON,
+        R3: relay3StatusON,
     };
+    console.log(data);
     socket.emit('relayControl', data);
 }
-
 
 socket.on('mqttData', (data) => {
     try {
