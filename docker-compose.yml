@@ -1,0 +1,8 @@
+version: "1"
+services:
+  app:
+    image: rjonmarco/mqtt-node
+    container_name: mqtt-node
+    restart: unless-stopped
+    ports:
+      - "3000:3000"

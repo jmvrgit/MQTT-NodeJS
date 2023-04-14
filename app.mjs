@@ -14,7 +14,7 @@ const app = express();
 const http = new HttpServer(app);
 const io = new SocketIoServer(http);
 const port = process.env.PORT || 3000;
-const pb = new PocketBase('http://127.0.0.1:8090');
+const pb = new PocketBase('http://host.docker.internal:8090');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.urlencoded({ extended: false }));
@@ -83,7 +83,7 @@ app.get('/', ensureAuthenticated, (req, res) => {
 // Serve login.html for the /login route
 app.get('/login', (req, res) => {
     // Check database connection
-    axios.get('http://localhost:8090/_/')
+    axios.get('http://host.docker.internal:8090/_/')
       .then(() => {
         // Database is up, send login page
         res.sendFile('login.html', { root: __dirname + '/public' });
@@ -92,6 +92,22 @@ app.get('/login', (req, res) => {
         // Database is down, send error message
         res.status(500).send('Database is currently down. Make sure that the database is up.');
       });
+});
+
+app.post('/login', async (req, res, next) => {
+  const { username, password } = req.body;
+  try {
+      const authData = await pb.collection('users').authWithPassword(username, password);
+      //console.log('Auth data:', authData);
+      req.login(authData, (err) => { // Change authData.model to authData
+          if (err) {
+              return next(err);
+          }
+          return res.redirect('/home');
+      });
+  } catch (error) {
+      res.redirect('/login');
+  }
 });
 
 // app.get('/historicalData', ensureAuthenticated, async (req, res) => {
