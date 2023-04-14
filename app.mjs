@@ -3,10 +3,12 @@ import express from 'express';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIoServer } from 'socket.io';
 import PocketBase from 'pocketbase';
+import axios from 'axios';
 import mqtt from 'mqtt';
 import session from 'express-session'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+
 
 const app = express();
 const http = new HttpServer(app);
@@ -58,23 +60,6 @@ passport.deserializeUser(async (id, done) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Modify the login route to use PocketBase authentication
-app.post('/login', async (req, res, next) => {
-    const { username, password } = req.body;
-    try {
-        const authData = await pb.collection('users').authWithPassword(username, password);
-        //console.log('Auth data:', authData);
-        req.login(authData, (err) => { // Change authData.model to authData
-            if (err) {
-                return next(err);
-            }
-            return res.redirect('/home');
-        });
-    } catch (error) {
-        res.redirect('/login');
-    }
-});
-
 app.post('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
@@ -97,7 +82,16 @@ app.get('/', ensureAuthenticated, (req, res) => {
 
 // Serve login.html for the /login route
 app.get('/login', (req, res) => {
-    res.sendFile('login.html', { root: __dirname + '/public' });
+    // Check database connection
+    axios.get('http://localhost:8090/_/')
+      .then(() => {
+        // Database is up, send login page
+        res.sendFile('login.html', { root: __dirname + '/public' });
+      })
+      .catch(() => {
+        // Database is down, send error message
+        res.status(500).send('Database is currently down. Make sure that the database is up.');
+      });
 });
 
 // app.get('/historicalData', ensureAuthenticated, async (req, res) => {
