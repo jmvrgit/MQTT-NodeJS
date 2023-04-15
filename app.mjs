@@ -101,11 +101,13 @@ app.post('/login', async (req, res, next) => {
       //console.log('Auth data:', authData);
       req.login(authData, (err) => { // Change authData.model to authData
           if (err) {
+              // console.log(err)
               return next(err);
           }
           return res.redirect('/home');
       });
   } catch (error) {
+      console.log(error)
       res.redirect('/login');
   }
 });
