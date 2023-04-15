@@ -163,7 +163,7 @@ mqttClient.on('message', async (topic, message) => {
     try {
         const data = JSON.parse(message);
         io.emit('mqttData', data);
-        // const record = await pb.collection('powerdata').create(data);
+        const record = await pb.collection('powerdata').create(data);
         // console.log(data);
     } catch (error) {
         console.error('Error processing message:', error);
