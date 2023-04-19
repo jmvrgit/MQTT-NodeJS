@@ -42,16 +42,26 @@ function updateChartContainerBorder() {
         const now = new Date();
         const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
         const nodeNameElement = container.querySelector('h2');
+        const relayCheckboxes = container.querySelectorAll('.relay-control');
 
         if (now - lastTimestamp >= tenMinutes) {
             container.style.border = '2px solid grey';
             nodeNameElement.innerHTML = `${nodeName} (Disconnected)`;
+            relayCheckboxes.forEach(checkbox => {
+                checkbox.disabled = true;
+            });
         } else if (now - lastTimestamp >= oneMinute) {
             container.style.border = '2px solid red';
             nodeNameElement.innerHTML = nodeName;
+            relayCheckboxes.forEach(checkbox => {
+                checkbox.disabled = false;
+            });
         } else {
             container.style.border = '2px solid green';
             nodeNameElement.innerHTML = nodeName;
+            relayCheckboxes.forEach(checkbox => {
+                checkbox.disabled = false;
+            });
         }
     });
 }
