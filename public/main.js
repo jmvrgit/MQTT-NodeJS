@@ -341,19 +341,19 @@ function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3Status
 
 socket.on('mqttData', (data) => {
     try {
-        const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, R1, R2, R3, status } = data;
+        const { node, V, A1, A2, A3, PF1, PF2, PF3, W1, W2, W3, R1, R2, R3, status } = data;
 
-        if (!nodeName || typeof voltage === 'undefined') {
+        if (!node || typeof V === 'undefined') {
             console.error('Invalid data received:', data);
             return;
         }
 
-        if (!charts[nodeName]) {
-            createCharts(nodeName);
+        if (!charts[node]) {
+            createCharts(node);
         }
 
-        lastReceivedData.set(nodeName, new Date());
-        updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(), [R1, R2, R3], status);
+        lastReceivedData.set(node, new Date());
+        updateCharts(node, V, [A1, A2, A3], [PF1, PF2, PF3], [W1, W2, W3], new Date(), [R1, R2, R3], status);
     } catch (error) {
         console.error('Error processing data:', error);
     }
