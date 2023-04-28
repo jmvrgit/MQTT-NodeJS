@@ -205,7 +205,7 @@ io.on('connection', (socket) => {
       const { node, r1, r2, r3 } = data;
       console.log(`Relay control for ${node}: R1=${r1}, R2=${r2}, R3=${r3}`);
       const relayTopic = `/relaycontrols/${node}`;
-      const relayPayload = JSON.stringify({ node, r1: r1, r2: r3, r3: r3 });
+      const relayPayload = JSON.stringify({ node, r1: r1, r2: r2, r3: r3 });
   
       mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
         if (err) {
