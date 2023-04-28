@@ -15,6 +15,7 @@ const http = new HttpServer(app);
 const io = new SocketIoServer(http);
 const port = process.env.PORT || 3000;
 const pb = new PocketBase('http://host.docker.internal:8090');
+// const pb = new PocketBase('localhost:8090');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.urlencoded({ extended: false }));
@@ -84,6 +85,7 @@ app.get('/', ensureAuthenticated, (req, res) => {
 app.get('/login', (req, res) => {
     // Check database connection
     axios.get('http://host.docker.internal:8090/_/')
+    // axios.get('http://localhost:8090/_/')
       .then(() => {
         // Database is up, send login page
         res.sendFile('login.html', { root: __dirname + '/public' });
