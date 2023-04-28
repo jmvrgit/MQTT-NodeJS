@@ -340,10 +340,10 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, r
 
 function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON) {
     const data = {
-        nodeName: nodeName,
-        R1: relay1StatusON,
-        R2: relay2StatusON,
-        R3: relay3StatusON,
+        node: nodeName,
+        r1: relay1StatusON,
+        r2: relay2StatusON,
+        r3: relay3StatusON,
     };
     console.log(data);
     socket.emit('relayControl', data);
@@ -351,9 +351,9 @@ function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3Status
 
 socket.on('mqttData', (data) => {
     try {
-        const { node, V, A1, A2, A3, PF1, PF2, PF3, W1, W2, W3, R1, R2, R3, status } = data;
+        const { node, v, a1, a2, a3, pf1, pf2, pf3, w1, w2, w3, r1, r2, r3, status } = data;
 
-        if (!node || typeof V === 'undefined') {
+        if (!node || typeof v === 'undefined') {
             console.error('Invalid data received:', data);
             return;
         }
@@ -363,7 +363,7 @@ socket.on('mqttData', (data) => {
         }
 
         lastReceivedData.set(node, new Date());
-        updateCharts(node, V, [A1, A2, A3], [PF1, PF2, PF3], [W1, W2, W3], new Date(), [R1, R2, R3], status);
+        updateCharts(node, v, [a1, a2, a3], [pf1, pf2, pf3], [w1, w2, w3], new Date(), [r1, r2, r3], status);
     } catch (error) {
         console.error('Error processing data:', error);
     }
