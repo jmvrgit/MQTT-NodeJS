@@ -74,7 +74,7 @@ function updateChartContainerBorder() {
 
 setInterval(updateChartContainerBorder, 1000);
 
-function createCharts(nodeName) {
+function createCharts(nodeName, relayStatuses) {
     const container = document.createElement('div');
     container.className = 'chart-container';
     container.setAttribute('data-node-name', nodeName);
@@ -138,7 +138,7 @@ function createCharts(nodeName) {
     ],
     };
 
-        const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
+    const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
     const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
     const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
 
@@ -162,6 +162,14 @@ function createCharts(nodeName) {
         const relay3StatusON = event.target.checked;
         sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON);
     });
+
+    relayStatuses.forEach((relayStatus, index) => {
+        const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
+        if (relaySwitch) {
+            relaySwitch.checked = relayStatus;
+        }
+    });
+
     // const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
     // const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
     // const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
@@ -272,7 +280,7 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, relayStatuses, status) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp,relayStatuses, status) {
     const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
@@ -314,12 +322,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp, r
         powerChart.update();
     });
     
-    relayStatuses.forEach((relayStatus, index) => {
-        const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
-        if (relaySwitch) {
-            relaySwitch.checked = relayStatus;
-        }
-    });
+
 
     const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
     const statusElement = container.querySelector('p');
@@ -359,7 +362,7 @@ socket.on('mqttData', (data) => {
         }
 
         if (!charts[node]) {
-            createCharts(node);
+            createCharts(node,[r1,r2,r3]);
         }
 
         lastReceivedData.set(node, new Date());
