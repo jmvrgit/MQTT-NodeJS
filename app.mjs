@@ -9,7 +9,6 @@ import session from 'express-session'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-
 const app = express();
 const http = new HttpServer(app);
 const io = new SocketIoServer(http);
@@ -56,7 +55,6 @@ passport.deserializeUser(async (id, done) => {
         done(error, null);
     }
 });
-
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -114,6 +112,55 @@ app.post('/login', async (req, res, next) => {
   }
 });
 
+http.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
+
+// const mqttBroker = 'mqtt://host.docker.internal:1883';
+const mqttBroker = 'mqtt://localhost:1883';
+const topic = 'powerdata';
+
+const mqttClient = mqtt.connect(mqttBroker);
+
+mqttClient.on('connect', () => {
+    console.log('Connected to MQTT broker');
+    mqttClient.subscribe(topic);
+});
+
+mqttClient.on('message', async (topic, message) => {
+    try {
+        const data = JSON.parse(message);
+        io.emit('mqttData', data);
+        const record = await pb.collection('powerdata').create(data);
+        // console.log(data);
+    } catch (error) {
+        console.error('Error processing message:', error);
+    }
+});
+
+app.use(express.json());
+
+// Assuming you have created a WebSocket server using socket.io
+io.on('connection', (socket) => {
+    console.log('A client has connected');
+  
+    // Listen for the 'relayControl' event
+    socket.on('relayControl', (data) => {
+      const { node, r1, r2, r3 } = data;
+      console.log(`Relay control for ${node}: R1=${r1}, R2=${r2}, R3=${r3}`);
+      const relayTopic = `/relaycontrols/${node}`;
+      const relayPayload = JSON.stringify({ node, r1: r1, r2: r2, r3: r3 });
+  
+      mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
+        if (err) {
+          console.error(`Error publishing to ${relayTopic}:`, err);
+        } else {
+          console.log(`Published to ${relayTopic}:`, relayPayload);
+        }
+      });
+    });
+  });
+
 // app.get('/historicalData', ensureAuthenticated, async (req, res) => {
 //     try {
 //         // Fetch all unique nodes
@@ -146,73 +193,3 @@ app.post('/login', async (req, res, next) => {
 //         res.status(500).json({ error: 'Failed to fetch historical data' });
 //     }
 // });
-
-
-http.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
-
-// const mqttBroker = 'mqtt://host.docker.internal:1883';
-const mqttBroker = 'mqtt://localhost:1883';
-const topic = 'powerdata';
-
-const mqttClient = mqtt.connect(mqttBroker);
-
-mqttClient.on('connect', () => {
-    console.log('Connected to MQTT broker');
-    mqttClient.subscribe(topic);
-});
-
-mqttClient.on('message', async (topic, message) => {
-    try {
-        const data = JSON.parse(message);
-        io.emit('mqttData', data);
-        const record = await pb.collection('powerdata').create(data);
-        // console.log(data);
-    } catch (error) {
-        console.error('Error processing message:', error);
-    }
-});
-
-app.use(express.json());
-// Assuming you have created a WebSocket server using socket.io
-
-// app.post('/relaycontrols/:nodeName', (req, res) => {
-//     const { nodeName } = req.params;
-//     const { relay1StatusON, relay2StatusON, relay3StatusON } = req.body;
-
-//     console.log(`Relay control for ${nodeName}: Relay1=${relay1StatusON}, Relay2=${relay2StatusON}, Relay3=${relay3StatusON}`);
-//     const relayTopic = `/relaycontrols/${nodeName}`;
-//     const relayPayload = JSON.stringify({ nodeName, R1: relay1StatusON, R2: relay2StatusON, R3: relay3StatusON });
-
-//     mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
-//         if (err) {
-//             console.error(`Error publishing to ${relayTopic}:`, err);
-//             res.sendStatus(500);
-//         } else {
-//             console.log(`Published to ${relayTopic}:`, relayPayload);
-//             res.sendStatus(200);
-//         }
-//     });
-// });
-
-// Assuming you have created a WebSocket server using socket.io
-io.on('connection', (socket) => {
-    console.log('A client has connected');
-  
-    // Listen for the 'relayControl' event
-    socket.on('relayControl', (data) => {
-      const { node, r1, r2, r3 } = data;
-      console.log(`Relay control for ${node}: R1=${r1}, R2=${r2}, R3=${r3}`);
-      const relayTopic = `/relaycontrols/${node}`;
-      const relayPayload = JSON.stringify({ node, r1: r1, r2: r2, r3: r3 });
-  
-      mqttClient.publish(relayTopic, relayPayload, {}, (err) => {
-        if (err) {
-          console.error(`Error publishing to ${relayTopic}:`, err);
-        } else {
-          console.log(`Published to ${relayTopic}:`, relayPayload);
-        }
-      });
-    });
-  });

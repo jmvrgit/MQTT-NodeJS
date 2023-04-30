@@ -1,37 +1,5 @@
 const socket = io();
-
 const charts = {};
-
-// async function fetchHistoricalData() {
-//     try {
-//         const response = await fetch('/historicalData');
-//         if (!response.ok) {
-//             throw new Error(`HTTP error! Status: ${response.status}`);
-//         }
-//         const data = await response.json();
-//         return data;
-//     } catch (error) {
-//         console.error('Error fetching historical data:', error);
-//         return [];
-//     }
-// }
-
-// function renderHistoricalData(data) {
-//     data.forEach(item => {
-//         const { nodeName, voltage, ampere1, ampere2, ampere3, phaseAngle1, phaseAngle2, phaseAngle3, power1, power2, power3, timestamp } = item;
-
-//         if (!nodeName || typeof voltage === 'undefined') {
-//             console.error('Invalid historical data item:', item);
-//             return;
-//         }
-
-//         if (!charts[nodeName]) {
-//             createCharts(nodeName);
-//         }
-//         updateCharts(nodeName, voltage, [ampere1, ampere2, ampere3], [phaseAngle1, phaseAngle2, phaseAngle3], [power1, power2, power3], new Date(timestamp));
-//     });
-// }
-
 const lastReceivedData = new Map();
 
 function updateChartContainerBorder() {
@@ -47,30 +15,24 @@ function updateChartContainerBorder() {
         if (now - lastTimestamp >= tenMinutes) {
             container.style.border = '2px solid grey';
             nodeNameElement.innerHTML = `${nodeName} (Disconnected)`;
-            relayCheckboxes.forEach(checkbox => {
-                checkbox.disabled = true;
-            });
+            // relayCheckboxes.forEach(checkbox => {
+            //     checkbox.disabled = true;
+            // });
         } else if (now - lastTimestamp >= oneMinute) {
             container.style.border = '2px solid red';
             nodeNameElement.innerHTML = nodeName;
-            relayCheckboxes.forEach(checkbox => {
-                checkbox.disabled = false;
-            });
+            // relayCheckboxes.forEach(checkbox => {
+            //     checkbox.disabled = false;
+            // });
         } else {
             container.style.border = '2px solid green';
             nodeNameElement.innerHTML = nodeName;
-            relayCheckboxes.forEach(checkbox => {
-                checkbox.disabled = false;
-            });
+            // relayCheckboxes.forEach(checkbox => {
+            //     checkbox.disabled = false;
+            // });
         }
     });
 }
-
-
-(async () => {
-    const historicalData = await fetchHistoricalData();
-    renderHistoricalData(historicalData);
-})();
 
 setInterval(updateChartContainerBorder, 1000);
 
@@ -169,73 +131,6 @@ function createCharts(nodeName, relayStatuses) {
             relaySwitch.checked = relayStatus;
         }
     });
-
-    // const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
-    // const relaySwitch2 = container.querySelector(`#${nodeName}-relay2`);
-    // const relaySwitch3 = container.querySelector(`#${nodeName}-relay3`);
-    
-    // relaySwitch1.addEventListener('change', async (event) => {
-    //     const relay1StatusON = event.target.checked;
-    //     const data = { nodeName, relay1StatusON };
-    
-    //     try {
-    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-    
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! Status: ${response.status}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error sending relay control:', error);
-    //     }
-    // });
-    
-    // relaySwitch2.addEventListener('change', async (event) => {
-    //     const relay2StatusON = event.target.checked;
-    //     const data = { nodeName, relay2StatusON };
-    
-    //     try {
-    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-    
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! Status: ${response.status}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error sending relay control:', error);
-    //     }
-    // });
-    
-    // relaySwitch3.addEventListener('change', async (event) => {
-    //     const relay3StatusON = event.target.checked;
-    //     const data = { nodeName, relay3StatusON };
-    
-    //     try {
-    //         const response = await fetch(`/relaycontrols/${nodeName}`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-    
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! Status: ${response.status}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error sending relay control:', error);
-    //     }
-    // });
 }
 
 function createCanvas(parentId) {
@@ -322,24 +217,22 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp,re
         powerChart.update();
     });
     
-
-
     const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
     const statusElement = container.querySelector('p');
     statusElement.innerHTML = `Status: ${status}`;
 
-}
+    const relayCheckboxes = container.querySelectorAll('.relay-control');
+    relayCheckboxes.forEach(checkbox => {
+    checkbox.disabled = status !== 'normal';
+    });
 
-// document.addEventListener('change', (event) => {
-//     const target = event.target;
-//     if (target.classList.contains('relay-control')) {
-//         const nodeName = target.getAttribute('data-node-name');
-//         const relayNumber = parseInt(target.getAttribute('data-relay-number'), 10);
-//         const relayStatusON = target.checked;
-//         console.log(nodeName, relayNumber, relayStatusON);
-//         sendRelayControl(nodeName, relayNumber, relayStatusON);
-//     }
-// });
+    relayStatuses.forEach((relayStatus, index) => {
+        const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
+        if (relaySwitch) {
+            relaySwitch.checked = relayStatus;
+        }
+    });
+}
 
 function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3StatusON) {
     const data = {
