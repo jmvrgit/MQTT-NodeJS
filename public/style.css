@@ -3,7 +3,7 @@
 
 #login-Image {
   position: absolute;
-  bottom: 61% ;
+  top: 0;
   left: 50%;
   transform: translateX(-60%);
   z-index: 0;
@@ -47,7 +47,7 @@
     background-color: #fff;
     padding: 10px;
     text-align: center;
-    width: 220px; /* set width to 200px */
+    width: 270px; /* set width to 200px */
     height: 20px; /* set height to 150px */
     margin: 0 auto;
     border-radius: 0;
