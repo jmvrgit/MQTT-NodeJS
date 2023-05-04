@@ -1,0 +1,125 @@
+.username input,
+.password input,
+
+#login-Image {
+  position: absolute;
+  bottom: 61% ;
+  left: 50%;
+  transform: translateX(-60%);
+  z-index: 0;
+
+}
+
+#login-Image img {
+  max-width: 120%;
+  height: auto;
+}
+
+
+#BackGroundImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("BG1.jpg");
+  background-size: cover;
+  z-index: 1;
+  opacity: 0.05; /* set opacity to 50% */
+}
+
+
+
+#login-Header {
+  
+  text-align: center;
+  max-width: 300px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 23;
+  bottom: 8%;
+  font-size: 28px;
+  color: #ffffff;
+}
+
+#login-userName {
+  
+    background-color: #fff;
+    padding: 10px;
+    text-align: center;
+    width: 220px; /* set width to 200px */
+    height: 20px; /* set height to 150px */
+    margin: 0 auto;
+    border-radius: 0;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    bottom: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+
+  }
+  
+
+
+#login-Password {
+  background-color: #fff;
+  padding: 10px;
+  text-align: center;
+  width: 220px; /* set width to 200px */
+  height: 20px; /* set height to 150px */
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+}
+
+#login-Password input,
+#login-userName input {
+  border: 0px solid #f301d3;
+  font-size: 110%;
+}
+
+#login-Button button {
+  
+  padding: 5px;
+  width: 50%;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  background: color #8A9A5B;;
+  align-items: center;
+  position: fixed;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+}
+
+
+#login-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background-color: #50C878;
+  border-radius: 0;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 350px;
+  height: 300px;
+  margin-top: 60px;
+  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(169, 199, 179, 0.5); /* set a semi-transparent background color to see the blur effect */
+}
+
