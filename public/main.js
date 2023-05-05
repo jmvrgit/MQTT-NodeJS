@@ -55,16 +55,19 @@ function createCharts(nodeName, relayStatuses) {
             <div id="${nodeName}-ampere1" class="chart"></div>
             <div id="${nodeName}-phase-angle1" class="chart"></div>
             <div id="${nodeName}-power1" class="chart"></div>
+            <div id="${nodeName}-energy1" class="chart"></div>
         </div>
         <div class="group">
             <div id="${nodeName}-ampere2" class="chart"></div>
             <div id="${nodeName}-phase-angle2" class="chart"></div>
             <div id="${nodeName}-power2" class="chart"></div>
+            <div id="${nodeName}-energy2" class="chart"></div>
         </div>
         <div class="group">
             <div id="${nodeName}-ampere3" class="chart"></div>
             <div id="${nodeName}-phase-angle3" class="chart"></div>
             <div id="${nodeName}-power3" class="chart"></div>
+            <div id="${nodeName}-energy3" class="chart"></div>
         </div>
     `;
 
@@ -80,6 +83,9 @@ function createCharts(nodeName, relayStatuses) {
     const powerCanvas1 = createCanvas(`${nodeName}-power1`);
     const powerCanvas2 = createCanvas(`${nodeName}-power2`);
     const powerCanvas3 = createCanvas(`${nodeName}-power3`);
+    const energyCanvas1 = createCanvas(`${nodeName}-energy1`);
+    const energyCanvas2 = createCanvas(`${nodeName}-energy2`);
+    const energyCanvas3 = createCanvas(`${nodeName}-energy3`);
 
     charts[nodeName] = {
         voltage: createChart(voltageCanvas, 'Voltage', 'V', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)', 190, 250),
@@ -97,7 +103,12 @@ function createCharts(nodeName, relayStatuses) {
             createChart(powerCanvas1, 'Power 1', 'W', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)'),
             createChart(powerCanvas2, 'Power 2', 'W', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)'),
             createChart(powerCanvas3, 'Power 3', 'W', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)'),
-    ],
+        ],
+        energy: [
+            createChart(energyCanvas1, 'Energy 1', 'KWh', 'rgba(153, 102, 255, 0.2)', 'rgba(153, 60, 255, 1)'),
+            createChart(energyCanvas2, 'Energy 2', 'KWh', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 60, 64, 1)'),
+            createChart(energyCanvas3, 'Energy 3', 'KWh', 'rgba(75, 192, 192, 0.2)', 'rgba(75, 60, 192, 1)'),
+        ],
     };
 
     const relaySwitch1 = container.querySelector(`#${nodeName}-relay1`);
@@ -175,7 +186,7 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
     });
 }
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp,relayStatuses, status) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp,relayStatuses, status) {
     const maxDataPoints = 100;
 
     const voltageChart = charts[nodeName].voltage;
@@ -216,6 +227,17 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp,re
         powerChart.data.datasets[0].data.push(power[index]);
         powerChart.update();
     });
+
+    charts[nodeName].energy.forEach((energyChart, index) => {
+        if (energyChart.data.labels.length >= maxDataPoints) {
+            energyChart.data.labels.shift();
+            energyChart.data.datasets[0].data.shift();
+        }
+        energyChart.data.labels.push(timestamp);
+        energyChart.data.datasets[0].data.push(energy[index]);
+        energyChart.update();
+    });
+    
     
     const container = document.querySelector(`.chart-container[data-node-name="${nodeName}"]`);
     const statusElement = container.querySelector('p');
@@ -248,8 +270,8 @@ function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3Status
 
 socket.on('mqttData', (data) => {
     try {
-        const { node, v, a1, a2, a3, pf1, pf2, pf3, w1, w2, w3, r1, r2, r3, status } = data;
-
+        const { node, v, a1, a2, a3, pf1, pf2, pf3, w1, w2, w3, e1, e2, e3, r1, r2, r3, status } = data;
+        console.log(data);
         if (!node || typeof v === 'undefined') {
             console.error('Invalid data received:', data);
             return;
@@ -260,7 +282,7 @@ socket.on('mqttData', (data) => {
         }
 
         lastReceivedData.set(node, new Date());
-        updateCharts(node, v, [a1, a2, a3], [pf1, pf2, pf3], [w1, w2, w3], new Date(), [r1, r2, r3], status);
+        updateCharts(node, v, [a1, a2, a3], [pf1, pf2, pf3], [w1, w2, w3], [e1, e2, e3], new Date(), [r1, r2, r3], status);
     } catch (error) {
         console.error('Error processing data:', error);
     }
