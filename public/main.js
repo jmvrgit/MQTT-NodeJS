@@ -221,10 +221,11 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, timestamp,re
     const statusElement = container.querySelector('p');
     statusElement.innerHTML = `Status: ${status}`;
 
-    const relayCheckboxes = container.querySelectorAll('.relay-control');
-    relayCheckboxes.forEach(checkbox => {
-    checkbox.disabled = status !== 'normal';
-    });
+    // comment out when testing so that you can test the relay even when blacked out
+    // const relayCheckboxes = container.querySelectorAll('.relay-control');
+    // relayCheckboxes.forEach(checkbox => {
+    // checkbox.disabled = status !== 'normal';
+    // });
 
     relayStatuses.forEach((relayStatus, index) => {
         const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
