@@ -161,6 +161,15 @@ io.on('connection', (socket) => {
     });
   });
 
+  app.get('/historicalData', ensureAuthenticated, async (req, res) => {
+    const page = req.query.page || 1;
+    const perPage = 50;
+    const filter = 'created > "2023-05-05 19:00"';
+    const resultList = await pb.collection('powerdata').getList(page, perPage, { filter });
+    res.send(resultList);
+  });
+
+
 // app.get('/historicalData', ensureAuthenticated, async (req, res) => {
 //     try {
 //         // Fetch all unique nodes
