@@ -307,24 +307,3 @@ document.getElementById('logout-button').addEventListener('click', async () => {
         console.error('Error logging out:', error);
     }
 });
-
-const perPage = 50;
-let currentPage = 1;
-let allResults = [];
-
-function fetchPage() {
-  fetch(`/historicalData?page=${currentPage}`)
-    .then(response => response.json())
-    .then(data => {
-      allResults = allResults.concat(data.items);
-      if (currentPage < data.totalPages) {
-        currentPage++;
-        fetchPage();
-      } else {
-        console.log(allResults);
-      }
-    })
-    .catch(error => console.error(error));
-}
-
-fetchPage();
