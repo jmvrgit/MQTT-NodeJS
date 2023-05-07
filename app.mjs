@@ -9,12 +9,20 @@ import session from 'express-session'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+// docker
+// const pb = new PocketBase('http://host.docker.internal:8090');
+// const pbURL = 'http://host.docker.internal:8090/_/';
+// const mqttBroker = 'mqtt://host.docker.internal:1883';
+
+// localhost
+const pb = new PocketBase('http://localhost:8090');
+const pbURL = 'http://localhost:8090/_/';
+const mqttBroker = 'mqtt://localhost:1883';
+
 const app = express();
 const http = new HttpServer(app);
 const io = new SocketIoServer(http);
 const port = process.env.PORT || 3000;
-// const pb = new PocketBase('http://host.docker.internal:8090');
-const pb = new PocketBase('http://localhost:8090');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.urlencoded({ extended: false }));
@@ -93,7 +101,8 @@ app.get('/', ensureAuthenticated, (req, res) => {
 app.get('/login', (req, res) => {
     // Check database connection
     // axios.get('http://host.docker.internal:8090/_/')
-    axios.get('http://localhost:8090/_/')
+    // axios.get('http://localhost:8090/_/')
+    axios.get(pbURL)
       .then(() => {
         // Database is up, send login page
         res.sendFile('login.html', { root: __dirname + '/public' });
@@ -126,8 +135,6 @@ http.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
-// const mqttBroker = 'mqtt://host.docker.internal:1883';
-const mqttBroker = 'mqtt://localhost:1883';
 const topic = 'powerdata';
 
 const mqttClient = mqtt.connect(mqttBroker);
