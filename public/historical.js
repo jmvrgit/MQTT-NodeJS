@@ -2,41 +2,58 @@ const perPage = 50;
 let currentPage = 1;
 let allResults = [];
 const charts = {};
-
-function fetchPage() {
-  fetch(`/historicalData?page=${currentPage}`)
-    .then(response => response.json())
-    .then(data => {
-      allResults = allResults.concat(data.items);
-      if (currentPage < data.totalPages) {
-        currentPage++;
-        fetchPage();
-      } else {
-        console.log(allResults);
-        // Find unique nodes and create charts for them
-        const uniqueNodes = Array.from(new Set(allResults.map(item => item.node)));
-        console.log(uniqueNodes)
-        uniqueNodes.forEach(node => createCharts(node));
-        // Update charts with historical data
-        allResults.forEach(item => {
-            updateCharts(
-                item.node,
-                item.v,
-                [item.a1, item.a2, item.a3],
-                [item.pf1, item.pf2, item.pf3],
-                [item.w1, item.w2, item.w3],
-                [item.e1, item.e2, item.e3],
-                item.created,
-                [item.r1, item.r2, item.r3],
-                item.status
-            );
-        });
-      }
-    })
-    .catch(error => console.error(error));
-}
-
-fetchPage();
+const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
+function fetchPage(pageNumber = 1, pageSize = 100) {
+    fetch(`/historicalData?page=${pageNumber}&perPage=${pageSize}`)
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => {
+            throw new Error(`Request failed with status ${response.status}: ${text}`);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        allResults = allResults.concat(data.items);
+        if (pageNumber < data.totalPages) {
+          fetchPage(pageNumber + 1, pageSize);
+        } else {
+          console.log(allResults);
+          // Sort allResults in reverse order based on the created field
+          allResults.sort((a, b) => new Date(b.created) - new Date(a.created));
+          // Find unique nodes and create charts for them
+          const uniqueNodes = Array.from(new Set(allResults.map(item => item.node)));
+          console.log(uniqueNodes)
+          uniqueNodes.forEach(node => createCharts(node));
+          // Update charts with historical data
+          uniqueNodes.forEach(node => {
+              let count = 0;
+              for (let i = allResults.length - 1; i >= 0; i--) {
+                  if (allResults[i].node === node) {
+                      updateCharts(
+                          allResults[i].node,
+                          allResults[i].v,
+                          [allResults[i].a1, allResults[i].a2, allResults[i].a3],
+                          [allResults[i].pf1, allResults[i].pf2, allResults[i].pf3],
+                          [allResults[i].w1, allResults[i].w2, allResults[i].w3],
+                          [allResults[i].e1, allResults[i].e2, allResults[i].e3],
+                          allResults[i].created,
+                          [allResults[i].r1, allResults[i].r2, allResults[i].r3],
+                          allResults[i].status
+                      );
+                      count++;
+                  }
+                  if (count >= maxDataPoints) {
+                      break; // stop processing once we reach 100 records for this node
+                  }
+              }
+          });
+        }
+      })
+      .catch(error => console.error(error));
+  }
+  
+  fetchPage();
 
 function createCanvas(parentId) {
     const parent = document.getElementById(parentId);
@@ -150,55 +167,80 @@ function createCharts(nodeName, relayStatuses) {
 }
 
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp,relayStatuses, status) {
-    const maxDataPoints = 100;
-
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp, relayStatuses, status) {
+    const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
+    // const timezoneOffset = 8 * 60 * 60 * 1000; // GMT+8 offset in milliseconds
+    const timezoneOffset = 0; // GMT+8 offset in milliseconds
+    // Convert the timestamp string to a Date object and add the timezone offset
+    const date = new Date(timestamp);
+    date.setTime(date.getTime() + timezoneOffset);
+  
     const voltageChart = charts[nodeName].voltage;
     if (voltageChart.data.labels.length >= maxDataPoints) {
-        voltageChart.data.labels.shift();
-        voltageChart.data.datasets[0].data.shift();
+      voltageChart.data.labels.shift();
+      voltageChart.data.datasets[0].data.shift();
     }
-    voltageChart.data.labels.push(timestamp);
+    voltageChart.data.labels.push(date);
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
-
+  
     charts[nodeName].ampere.forEach((ampereChart, index) => {
-        if (ampereChart.data.labels.length >= maxDataPoints) {
-            ampereChart.data.labels.shift();
-            ampereChart.data.datasets[0].data.shift();
-        }
-        ampereChart.data.labels.push(timestamp);
-        ampereChart.data.datasets[0].data.push(ampere[index]);
-        ampereChart.update();
+      if (ampereChart.data.labels.length >= maxDataPoints) {
+        ampereChart.data.labels.shift();
+        ampereChart.data.datasets[0].data.shift();
+      }
+      ampereChart.data.labels.push(date);
+      ampereChart.data.datasets[0].data.push(ampere[index]);
+      ampereChart.update();
     });
-
+  
     charts[nodeName].phaseAngle.forEach((phaseAngleChart, index) => {
-        if (phaseAngleChart.data.labels.length >= maxDataPoints) {
-            phaseAngleChart.data.labels.shift();
-            phaseAngleChart.data.datasets[0].data.shift();
-        }
-        phaseAngleChart.data.labels.push(timestamp);
-        phaseAngleChart.data.datasets[0].data.push(phaseAngle[index]);
-        phaseAngleChart.update();
+      if (phaseAngleChart.data.labels.length >= maxDataPoints) {
+        phaseAngleChart.data.labels.shift();
+        phaseAngleChart.data.datasets[0].data.shift();
+      }
+      phaseAngleChart.data.labels.push(date);
+      phaseAngleChart.data.datasets[0].data.push(phaseAngle[index]);
+      phaseAngleChart.update();
     });
-
+  
     charts[nodeName].power.forEach((powerChart, index) => {
-        if (powerChart.data.labels.length >= maxDataPoints) {
-            powerChart.data.labels.shift();
-            powerChart.data.datasets[0].data.shift();
-        }
-        powerChart.data.labels.push(timestamp);
-        powerChart.data.datasets[0].data.push(power[index]);
-        powerChart.update();
+      if (powerChart.data.labels.length >= maxDataPoints) {
+        powerChart.data.labels.shift();
+        powerChart.data.datasets[0].data.shift();
+      }
+      powerChart.data.labels.push(date);
+      powerChart.data.datasets[0].data.push(power[index]);
+      powerChart.update();
     });
-
+  
     charts[nodeName].energy.forEach((energyChart, index) => {
-        if (energyChart.data.labels.length >= maxDataPoints) {
-            energyChart.data.labels.shift();
-            energyChart.data.datasets[0].data.shift();
-        }
-        energyChart.data.labels.push(timestamp);
-        energyChart.data.datasets[0].data.push(energy[index]);
-        energyChart.update();
+      if (energyChart.data.labels.length >= maxDataPoints) {
+        energyChart.data.labels.shift();
+        energyChart.data.datasets[0].data.shift();
+      }
+      energyChart.data.labels.push(date);
+      energyChart.data.datasets[0].data.push(energy[index]);
+      energyChart.update();
     });
-}
+  }
+
+  document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Redirect to the login page after successful logout
+        window.location.href = '/login';
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+});

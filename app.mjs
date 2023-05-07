@@ -68,11 +68,21 @@ app.post('/logout', (req, res) => {
         }
     });
 });
+app.get('/nodes.html', ensureAuthenticated, (req, res) => {
+  res.redirect('/home');
+});
 
+app.get('/historical.html', ensureAuthenticated, (req, res) => {
+  res.redirect('/home');
+});
 
 // Serve index.html for the /home route
 app.get('/home', ensureAuthenticated, (req, res) => {
     res.sendFile('nodes.html', { root: __dirname + '/public' });
+});
+
+app.get('/historical', ensureAuthenticated, (req, res) => {
+  res.sendFile('historical.html', { root: __dirname + '/public' });
 });
 
 app.get('/', ensureAuthenticated, (req, res) => {
@@ -163,49 +173,20 @@ io.on('connection', (socket) => {
 
   app.get('/historicalData', ensureAuthenticated, async (req, res) => {
     const page = req.query.page || 1;
-    const perPage = 50;
-    const filter = 'created > "2023-05-05 19:00"';
-    const resultList = await pb.collection('powerdata').getList(page, perPage, { filter });
-    res.send(resultList);
+    const perPage = req.query.perPage || 50;
+    const filter = 'created > \'2023-05-05 19:00\' && isFake != true';
+    const offset = (page - 1) * perPage;
+    const limit = perPage;
+    const result = await pb.collection('powerdata').getList(limit, offset, { filter, includeTotal: true });
+    const resultList = result.items;
+    const totalItems = result.total;
+    const totalPages = Math.ceil(totalItems / perPage);
+    res.send({
+      items: resultList,
+      page,
+      perPage,
+      totalPages,
+      totalItems
+    });
   });
-
-  app.get('/uniquenodes', ensureAuthenticated, async (req, res) => {
-    const page = req.query.page || 1;
-    const perPage = 50;
-    const filter = 'created > "2023-05-05 19:00"';
-    const resultList = await pb.collection('powerdata').getList(page, perPage, { filter });
-    res.send(resultList);
-  });
-
-// app.get('/historicalData', ensureAuthenticated, async (req, res) => {
-//     try {
-//         // Fetch all unique nodes
-//         const uniqueNodes = await pb.collection('powerdata').getFullList(1,20);
-
-//         // Initialize an empty array to store the last 20 data points for each unique node
-//         const historicalData = [];
-
-//         // Calculate the timestamp for 10 seconds ago
-//         const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
-
-//         // Fetch the last 20 data points for each unique node
-//         for (const node of uniqueNodes) {
-//             const nodeData = await pb.collection('powerdata').getList(1, 20);
-
-//             // Filter the node data based on the timestamp
-//             const filteredNodeData = nodeData.items.filter(item => {
-//                 const itemCreated = new Date(item.created);
-//                 return itemCreated >= tenSecondsAgo;
-//             });
-
-//             // Add the filtered node data to the historicalData array
-//             historicalData.push(...filteredNodeData);
-//         }
-
-//         // Return the historical data as a JSON response
-//         res.json(historicalData);
-//     } catch (error) {
-//         console.error('Error fetching historical data:', error.stack);
-//         res.status(500).json({ error: 'Failed to fetch historical data' });
-//     }
-// });
+  
