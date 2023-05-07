@@ -271,7 +271,7 @@ function sendRelayControl(nodeName, relay1StatusON, relay2StatusON, relay3Status
 socket.on('mqttData', (data) => {
     try {
         const { node, v, a1, a2, a3, pf1, pf2, pf3, w1, w2, w3, e1, e2, e3, r1, r2, r3, status } = data;
-        console.log(data);
+        // console.log(data);
         if (!node || typeof v === 'undefined') {
             console.error('Invalid data received:', data);
             return;
