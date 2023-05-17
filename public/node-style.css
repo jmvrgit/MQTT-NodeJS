@@ -1,0 +1,13 @@
+#button-container
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+#button-container button {
+    margin: 0 10px; /* Adjust the margin to control the spacing between buttons */
+    background: #333; /* Adjust the background color on hover */
+    color: white; 
+
+}

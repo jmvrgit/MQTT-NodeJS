@@ -7,8 +7,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="stylesheet" href="node-style.css">
 
-    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,6 +17,7 @@
         }
         
         h1 {
+            text-align: center;
             background-color: #4CAF50;
             color: white;
             padding: 1rem;
@@ -40,18 +41,27 @@
         }
         
         .chart {
-            width: 30%;
+            /*yung graph na malaki sa taas*/
+            width: 50%;
         }
     </style>
     
     
 </head>
 <body>
-    <h1>Realtime Node Data</h1>
-    <button id="logout-button">Logout</button>
+    <h1>Live Node Data</h1>
+
+    <div id="button-container">
+        <button id="Live-button">Live Data</button>
+        <button id="History-button">Historical Data</button>
+        <button id="Dbase-button">Database</button>
+        <button id="logout-button">Logout</button>
+    </div>
+
     <div id="charts-container">
         <!-- Charts will be generated here -->
     </div>
+
     <script src="main.js"></script>
 </body>
 </html>
