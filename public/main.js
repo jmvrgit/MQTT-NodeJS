@@ -307,3 +307,13 @@ document.getElementById('logout-button').addEventListener('click', async () => {
         console.error('Error logging out:', error);
     }
 });
+
+document.getElementById('Historical-button').addEventListener('click', () => {
+    try {
+      // Redirect to the historical.html page
+      window.location.href = 'historical.html';
+    } catch (error) {
+      console.error('Error redirecting to historical page:', error);
+    }
+  });
+  

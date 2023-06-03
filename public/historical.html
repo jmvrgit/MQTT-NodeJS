@@ -7,9 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     
-    <title>Document</title>
+    <title>Historical Data</title>
     <style>
-        body {
+         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -18,8 +18,11 @@
         h1 {
             background-color: #4CAF50;
             color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2rem;   
         }
         
         .chart-container {
@@ -33,21 +36,35 @@
         
         .group {
             display: flex;
+            flex-direction: column;
             justify-content: space-around;
             width: 100%;
-            margin: 1rem 0;
+            margin: 2rem 0;
+            margin-bottom: 20%;
+            
         }
         
         .chart {
-            width: 30%;
+            width: 100%;
         }
+
+        .button-Container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        }
+
     </style>
     
 </head>
 <body>
     <h1>Historical Node Data</h1>
-    <button id="logout-button">Logout</button>
-    <a href="home">Live Node Data</a>
+    <div class="button-Container">
+        <button id="Live-button">Live Data</button>
+        <button id="Dbase-button">Data Base</button>
+        <button id="logout-button">Logout</button>
+    </div>
+
     <div id="charts-container">
         <!-- Charts will be generated here -->
     </div>

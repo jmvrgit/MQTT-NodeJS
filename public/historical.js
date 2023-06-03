@@ -244,3 +244,11 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         console.error('Error logging out:', error);
     }
 });
+document.getElementById('Live-button').addEventListener('click', () => {
+  try {
+    // Redirect to the live.html page
+    window.location.href = 'nodes.html';
+  } catch (error) {
+    console.error('Error redirecting to live page:', error);
+  }
+});
