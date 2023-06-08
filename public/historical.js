@@ -247,7 +247,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
 document.getElementById('Live-button').addEventListener('click', () => {
   try {
     // Redirect to the live.html page
-    window.location.href = 'nodes.html';
+    window.location.href = 'home';
   } catch (error) {
     console.error('Error redirecting to live page:', error);
   }

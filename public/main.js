@@ -311,7 +311,7 @@ document.getElementById('logout-button').addEventListener('click', async () => {
 document.getElementById('Historical-button').addEventListener('click', () => {
     try {
       // Redirect to the historical.html page
-      window.location.href = 'historical.html';
+      window.location.href = 'historical';
     } catch (error) {
       console.error('Error redirecting to historical page:', error);
     }
