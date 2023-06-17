@@ -1,3 +1,5 @@
+const charts = {};
+
 document.getElementById('dateInput').addEventListener('change', function(e) {
   const date = e.target.value;
 
@@ -11,9 +13,32 @@ document.getElementById('dateInput').addEventListener('change', function(e) {
     .then(data => {
       const allResults = data;
       console.log(allResults);
+
+      // Assuming 'data' is an array of your data objects
+      data.forEach(datum => {
+        const nodeName = datum.node;
+        // Create charts for this node if they do not exist
+        if (!charts[nodeName]) {
+            createCharts(nodeName, [datum.r1, datum.r2, datum.r3]);
+        }
+
+        // Update charts for this node
+        updateCharts(
+            nodeName,
+            datum.v,
+            [datum.a1, datum.a2, datum.a3],
+            [datum.pf1, datum.pf2, datum.pf3],
+            [datum.w1, datum.w2, datum.w3],
+            [datum.e1, datum.e2, datum.e3],
+            datum.created,
+            [datum.r1, datum.r2, datum.r3],
+            datum.status
+        );
+      });
     })
     .catch(error => console.error(error));
 });
+
 
 
 function createCanvas(parentId) {
