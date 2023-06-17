@@ -1,60 +1,17 @@
-const perPage = 50;
-let currentPage = 1;
-let allResults = [];
-const charts = {};
-const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
-function fetchPage(pageNumber = 1, pageSize = 100) {
-    fetch(`/historicalData?page=${pageNumber}&perPage=${pageSize}`)
-      .then(response => {
-        if (!response.ok) {
-          return response.text().then(text => {
-            throw new Error(`Request failed with status ${response.status}: ${text}`);
-          });
-        }
-        return response.json();
-      })
-      .then(data => {
-        allResults = allResults.concat(data.items);
-        if (pageNumber < data.totalPages) {
-          fetchPage(pageNumber + 1, pageSize);
-        } else {
-          console.log(allResults);
-          // Sort allResults in reverse order based on the created field
-          allResults.sort((a, b) => new Date(b.created) - new Date(a.created));
-          // Find unique nodes and create charts for them
-          const uniqueNodes = Array.from(new Set(allResults.map(item => item.node)));
-          console.log(uniqueNodes)
-          uniqueNodes.forEach(node => createCharts(node));
-          // Update charts with historical data
-          uniqueNodes.forEach(node => {
-              let count = 0;
-              for (let i = allResults.length - 1; i >= 0; i--) {
-                  if (allResults[i].node === node) {
-                      updateCharts(
-                          allResults[i].node,
-                          allResults[i].v,
-                          [allResults[i].a1, allResults[i].a2, allResults[i].a3],
-                          [allResults[i].pf1, allResults[i].pf2, allResults[i].pf3],
-                          [allResults[i].w1, allResults[i].w2, allResults[i].w3],
-                          [allResults[i].e1, allResults[i].e2, allResults[i].e3],
-                          allResults[i].created,
-                          [allResults[i].r1, allResults[i].r2, allResults[i].r3],
-                          allResults[i].status
-                      );
-                      count++;
-                  }
-                  if (count >= maxDataPoints) {
-                      break; // stop processing once we reach 100 records for this node
-                  }
-              }
-          });
-        }
-      })
-      .catch(error => console.error(error));
-  }
-  
-  fetchPage();
+fetch('/historicalData')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    const allResults = data;
+    console.log(allResults);
+  })
+  .catch(error => console.error(error));
 
+  
 function createCanvas(parentId) {
     const parent = document.getElementById(parentId);
     const canvas = document.createElement('canvas');
