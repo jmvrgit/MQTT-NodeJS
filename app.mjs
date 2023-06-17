@@ -179,23 +179,20 @@ io.on('connection', (socket) => {
   });
 
   app.get('/historicalData', ensureAuthenticated, async (req, res) => {
-    let date = req.query.date;
-    
-    if (!date) {
-      // If no date provided, use today's date
-      date = new Date().toISOString().split('T')[0]; 
-    }
-    
-    // Combine date with time
-    date = `${date}`;
+    let startDate = req.query.startDate.replace('T', ' ');
+    let endDate = req.query.endDate.replace('T', ' ');
   
-    let filter = `isFake = False && created >= "${date} 00:00:00" && created < "${date} 23:59:59"`;
+    if (!startDate || !endDate) {
+      return res.status(400).send("Both startDate and endDate are required");
+    }
+  
+    let filter = `isFake = False && created >= "${startDate}" && created <= "${endDate}"`;
     console.log(filter);
     const records = await pb.collection('powerdata').getFullList({
       sort: '-created',
       filter: filter,
     });
-    
+  
     res.send(records);
   });
   

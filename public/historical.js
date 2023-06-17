@@ -1,9 +1,15 @@
 const charts = {};
 
-document.getElementById('dateInput').addEventListener('change', function(e) {
-  const date = e.target.value;
+document.getElementById('Dbase-button').addEventListener('click', function() {
+  const startDate = document.getElementById('startDateInput').value;
+  const endDate = document.getElementById('endDateInput').value;
 
-  fetch(`/historicalData?date=${date}`)
+  // Convert start date and end date from GMT+8 to UTC
+  const startDateUTC = new Date(startDate).toISOString().slice(0,16).replace("T", " ");
+  const endDateUTC = new Date(endDate).toISOString().slice(0,16).replace("T", " ");
+
+  // Fetch using the converted UTC dates
+  fetch(`/historicalData?startDate=${startDateUTC}&endDate=${endDateUTC}`)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -155,9 +161,7 @@ function createCharts(nodeName, relayStatuses) {
 
 function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp, relayStatuses, status) {
     const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
-    // const timezoneOffset = 8 * 60 * 60 * 1000; // GMT+8 offset in milliseconds
     const timezoneOffset = 0; // GMT+8 offset in milliseconds
-    // Convert the timestamp string to a Date object and add the timezone offset
     const date = new Date(timestamp);
     date.setTime(date.getTime() + timezoneOffset);
   
