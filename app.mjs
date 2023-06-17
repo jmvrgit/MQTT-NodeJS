@@ -179,11 +179,23 @@ io.on('connection', (socket) => {
   });
 
   app.get('/historicalData', ensureAuthenticated, async (req, res) => {
-    const filter = 'isFake != true';
+    let date = req.query.date;
+    
+    if (!date) {
+      // If no date provided, use today's date
+      date = new Date().toISOString().split('T')[0]; 
+    }
+    
+    // Combine date with time
+    date = `${date}`;
+  
+    let filter = `isFake = False && created >= "${date} 00:00:00" && created < "${date} 23:59:59"`;
+    console.log(filter);
     const records = await pb.collection('powerdata').getFullList({
       sort: '-created',
       filter: filter,
     });
+    
     res.send(records);
   });
   

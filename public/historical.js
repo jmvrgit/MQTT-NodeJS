@@ -1,17 +1,21 @@
-fetch('/historicalData')
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    const allResults = data;
-    console.log(allResults);
-  })
-  .catch(error => console.error(error));
+document.getElementById('dateInput').addEventListener('change', function(e) {
+  const date = e.target.value;
 
-  
+  fetch(`/historicalData?date=${date}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      const allResults = data;
+      console.log(allResults);
+    })
+    .catch(error => console.error(error));
+});
+
+
 function createCanvas(parentId) {
     const parent = document.getElementById(parentId);
     const canvas = document.createElement('canvas');
