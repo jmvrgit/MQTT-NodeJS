@@ -55,13 +55,30 @@
         }
 
     </style>
+    <script>
+        function formatDate(date) {
+            let year = date.getFullYear();
+            let month = ("0" + (date.getMonth() + 1)).slice(-2); // Months are zero based
+            let day = ("0" + date.getDate()).slice(-2);
+            let hour = ("0" + date.getHours()).slice(-2);
+            let minute = ("0" + date.getMinutes()).slice(-2);
+            return `${year}-${month}-${day}T${hour}:${minute}`;
+        }
     
+        window.onload = function () {
+            let now = new Date();
+            document.getElementById('startDateInput').value = formatDate(now);
+            document.getElementById('endDateInput').value = formatDate(now);
+        }
+    </script>
 </head>
 <body>
     <h1>Historical Node Data</h1>
     <div class="button-Container">
+        <input type="datetime-local" id="startDateInput">
+        <input type="datetime-local" id="endDateInput">
+        <button id="Dbase-button">Fetch Data</button>
         <button id="Live-button">Live Data</button>
-        <button id="Dbase-button">Data Base</button>
         <button id="logout-button">Logout</button>
     </div>
 
@@ -71,3 +88,4 @@
     <script src="historical.js"></script>
 </body>
 </html>
+

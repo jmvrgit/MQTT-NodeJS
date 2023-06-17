@@ -1,59 +1,51 @@
-const perPage = 50;
-let currentPage = 1;
-let allResults = [];
 const charts = {};
-const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
-function fetchPage(pageNumber = 1, pageSize = 100) {
-    fetch(`/historicalData?page=${pageNumber}&perPage=${pageSize}`)
-      .then(response => {
-        if (!response.ok) {
-          return response.text().then(text => {
-            throw new Error(`Request failed with status ${response.status}: ${text}`);
-          });
+
+document.getElementById('Dbase-button').addEventListener('click', function() {
+  const startDate = document.getElementById('startDateInput').value;
+  const endDate = document.getElementById('endDateInput').value;
+
+  // Convert start date and end date from GMT+8 to UTC
+  const startDateUTC = new Date(startDate).toISOString().slice(0,16).replace("T", " ");
+  const endDateUTC = new Date(endDate).toISOString().slice(0,16).replace("T", " ");
+
+  // Fetch using the converted UTC dates
+  fetch(`/historicalData?startDate=${startDateUTC}&endDate=${endDateUTC}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      const allResults = data;
+      console.log(allResults);
+
+      // Assuming 'data' is an array of your data objects
+      data.forEach(datum => {
+        const nodeName = datum.node;
+        // Create charts for this node if they do not exist
+        if (!charts[nodeName]) {
+            createCharts(nodeName, [datum.r1, datum.r2, datum.r3]);
         }
-        return response.json();
-      })
-      .then(data => {
-        allResults = allResults.concat(data.items);
-        if (pageNumber < data.totalPages) {
-          fetchPage(pageNumber + 1, pageSize);
-        } else {
-          console.log(allResults);
-          // Sort allResults in reverse order based on the created field
-          allResults.sort((a, b) => new Date(b.created) - new Date(a.created));
-          // Find unique nodes and create charts for them
-          const uniqueNodes = Array.from(new Set(allResults.map(item => item.node)));
-          console.log(uniqueNodes)
-          uniqueNodes.forEach(node => createCharts(node));
-          // Update charts with historical data
-          uniqueNodes.forEach(node => {
-              let count = 0;
-              for (let i = allResults.length - 1; i >= 0; i--) {
-                  if (allResults[i].node === node) {
-                      updateCharts(
-                          allResults[i].node,
-                          allResults[i].v,
-                          [allResults[i].a1, allResults[i].a2, allResults[i].a3],
-                          [allResults[i].pf1, allResults[i].pf2, allResults[i].pf3],
-                          [allResults[i].w1, allResults[i].w2, allResults[i].w3],
-                          [allResults[i].e1, allResults[i].e2, allResults[i].e3],
-                          allResults[i].created,
-                          [allResults[i].r1, allResults[i].r2, allResults[i].r3],
-                          allResults[i].status
-                      );
-                      count++;
-                  }
-                  if (count >= maxDataPoints) {
-                      break; // stop processing once we reach 100 records for this node
-                  }
-              }
-          });
-        }
-      })
-      .catch(error => console.error(error));
-  }
-  
-  fetchPage();
+
+        // Update charts for this node
+        updateCharts(
+            nodeName,
+            datum.v,
+            [datum.a1, datum.a2, datum.a3],
+            [datum.pf1, datum.pf2, datum.pf3],
+            [datum.w1, datum.w2, datum.w3],
+            [datum.e1, datum.e2, datum.e3],
+            datum.created,
+            [datum.r1, datum.r2, datum.r3],
+            datum.status
+        );
+      });
+    })
+    .catch(error => console.error(error));
+});
+
+
 
 function createCanvas(parentId) {
     const parent = document.getElementById(parentId);
@@ -169,9 +161,7 @@ function createCharts(nodeName, relayStatuses) {
 
 function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp, relayStatuses, status) {
     const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
-    // const timezoneOffset = 8 * 60 * 60 * 1000; // GMT+8 offset in milliseconds
     const timezoneOffset = 0; // GMT+8 offset in milliseconds
-    // Convert the timestamp string to a Date object and add the timezone offset
     const date = new Date(timestamp);
     date.setTime(date.getTime() + timezoneOffset);
   

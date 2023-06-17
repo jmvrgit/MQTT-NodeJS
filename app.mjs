@@ -179,21 +179,20 @@ io.on('connection', (socket) => {
   });
 
   app.get('/historicalData', ensureAuthenticated, async (req, res) => {
-    const page = req.query.page || 1;
-    const perPage = req.query.perPage || 50;
-    const filter = 'created > \'2023-05-05 19:00\' && isFake != true';
-    const offset = (page - 1) * perPage;
-    const limit = perPage;
-    const result = await pb.collection('powerdata').getList(limit, offset, { filter, includeTotal: true });
-    const resultList = result.items;
-    const totalItems = result.total;
-    const totalPages = Math.ceil(totalItems / perPage);
-    res.send({
-      items: resultList,
-      page,
-      perPage,
-      totalPages,
-      totalItems
+    let startDate = req.query.startDate.replace('T', ' ');
+    let endDate = req.query.endDate.replace('T', ' ');
+  
+    if (!startDate || !endDate) {
+      return res.status(400).send("Both startDate and endDate are required");
+    }
+  
+    let filter = `isFake = False && created >= "${startDate}" && created <= "${endDate}"`;
+    console.log(filter);
+    const records = await pb.collection('powerdata').getFullList({
+      sort: '-created',
+      filter: filter,
     });
+  
+    res.send(records);
   });
   
