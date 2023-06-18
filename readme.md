@@ -8,4 +8,4 @@ docker push rjonmarco/mqtt-node:latest
 docker compose up -d
 
 ## its broken use:
-npm start
+npm run start

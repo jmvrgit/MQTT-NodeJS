@@ -10,14 +10,20 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 // docker
-// const pb = new PocketBase('http://host.docker.internal:8090');
-// const pbURL = 'http://host.docker.internal:8090/_/';
-// const mqttBroker = 'mqtt://host.docker.internal:1883';
+const pb = new PocketBase('http://host.docker.internal:8090');
+const pbURL = 'http://host.docker.internal:8090/_/';
+const mqttBroker = 'mqtt://host.docker.internal:1883';
 
 // localhost
-const pb = new PocketBase('http://localhost:8090');
-const pbURL = 'http://localhost:8090/_/';
-const mqttBroker = 'mqtt://localhost:1883';
+// const pb = new PocketBase('http://localhost:8090');
+// const pbURL = 'http://localhost:8090/_/';
+// const mqttBroker = 'mqtt://localhost:1883';
+
+// thesis.local
+// const pb = new PocketBase('http://thesis.local:8090');
+// const pbURL = 'http://thesis.local:8090/_/';
+// const mqttBroker = 'mqtt://thesis.local:1883';
+
 
 const app = express();
 const http = new HttpServer(app);
