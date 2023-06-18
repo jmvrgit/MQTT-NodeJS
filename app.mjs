@@ -22,7 +22,7 @@ const mqttBroker = 'mqtt://localhost:1883';
 const app = express();
 const http = new HttpServer(app);
 const io = new SocketIoServer(http);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.urlencoded({ extended: false }));
