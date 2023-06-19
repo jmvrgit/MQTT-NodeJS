@@ -222,14 +222,14 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
 
-    // charts[nodeName].runningStats.voltage.total += voltage[index];
-    // charts[nodeName].runningStats.voltage.count++;
-    // const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
-    // console.log("Average Voltage "+ nodeName + " " + voltageAverage);
-    // const avgvoltageElement = document.getElementById(`${nodeName}-average-current`);
-    // if (avgvoltageElement) {
-    //     avgvoltageElement.innerText = `Average Voltage: ${voltageAverage.toFixed(2)}`;
-    // }
+    charts[nodeName].runningStats.voltage.total += voltage;
+    charts[nodeName].runningStats.voltage.count++;
+    const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
+    console.log("Average Voltage "+ nodeName + " " + voltageAverage);
+    const avgVoltageElement = document.getElementById(`${nodeName}-average-voltage`);
+    if (avgVoltageElement) {
+        avgVoltageElement.innerText = `Average Voltage: ${voltageAverage.toFixed(2)}`;
+    }
 
     charts[nodeName].ampere.forEach((ampereChart, index) => {
         if (ampereChart.data.labels.length >= maxDataPoints) {
