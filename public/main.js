@@ -52,6 +52,10 @@ function createCharts(nodeName, relayStatuses) {
         <label for="${nodeName}-relay3">Socket 3: </label>
         <input type="checkbox" id="${nodeName}-relay3" class="relay-control" data-node-name="${nodeName}" data-relay-number="3">        
         <p>Status: ${status}</p>
+        <p id="${nodeName}-status">Status: ${status}</p>
+        <p id="${nodeName}-average-voltage">Average Voltage: </p>
+        <p id="${nodeName}-average-current">Average Current: </p>
+        <p id="${nodeName}-average-power">Average Power: </p>        
         <div class="collapsible-content">
         <div id="${nodeName}-voltage" class="chart"></div>
         <div class="group">
@@ -205,7 +209,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         charts[nodeName].runningStats = {
             voltage: { total: 0, count: 0 },
             ampere: { total: 0, count: 0 },
-            energy: { total: 0, count: 0 },
+            power: { total: 0, count: 0 },
         };
     }
     const voltageChart = charts[nodeName].voltage;
@@ -214,26 +218,36 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         voltageChart.data.datasets[0].data.shift();
     }
 
-    charts[nodeName].runningStats.voltage.total += voltage;
-    charts[nodeName].runningStats.voltage.count++;
-    const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
-    console.log("Average Voltage "+ nodeName + " " + voltageAverage);
     voltageChart.data.labels.push(timestamp);
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
+
+    // charts[nodeName].runningStats.voltage.total += voltage[index];
+    // charts[nodeName].runningStats.voltage.count++;
+    // const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
+    // console.log("Average Voltage "+ nodeName + " " + voltageAverage);
+    // const avgvoltageElement = document.getElementById(`${nodeName}-average-current`);
+    // if (avgvoltageElement) {
+    //     avgvoltageElement.innerText = `Average Voltage: ${voltageAverage.toFixed(2)}`;
+    // }
 
     charts[nodeName].ampere.forEach((ampereChart, index) => {
         if (ampereChart.data.labels.length >= maxDataPoints) {
             ampereChart.data.labels.shift();
             ampereChart.data.datasets[0].data.shift();
         }
+        ampereChart.data.labels.push(timestamp);
+        ampereChart.data.datasets[0].data.push(ampere[index]);
+        ampereChart.update();
+
         charts[nodeName].runningStats.ampere.total += ampere[index];
         charts[nodeName].runningStats.ampere.count++;
         const ampereAverage = charts[nodeName].runningStats.ampere.total / charts[nodeName].runningStats.ampere.count;
         console.log("Average Current "+ nodeName + " " + ampereAverage);
-        ampereChart.data.labels.push(timestamp);
-        ampereChart.data.datasets[0].data.push(ampere[index]);
-        ampereChart.update();
+        const avgcurrentElement = document.getElementById(`${nodeName}-average-current`);
+        if (avgcurrentElement) {
+            avgcurrentElement.innerText = `Average Current: ${ampereAverage.toFixed(2)}`;
+        }
     });
 
     charts[nodeName].phaseAngle.forEach((phaseAngleChart, index) => {
@@ -254,6 +268,15 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         powerChart.data.labels.push(timestamp);
         powerChart.data.datasets[0].data.push(power[index]);
         powerChart.update();
+
+        charts[nodeName].runningStats.power.total += power[index];
+        charts[nodeName].runningStats.power.count++;
+        const powerAverage = charts[nodeName].runningStats.power.total / charts[nodeName].runningStats.power.count;
+        console.log("Average power "+ nodeName + " " + powerAverage);
+        const avgpowerElement = document.getElementById(`${nodeName}-average-power`);
+        if (avgpowerElement) {
+            avgpowerElement.innerText = `Average Power: ${powerAverage.toFixed(2)}`;
+        }
     });
 
     charts[nodeName].energy.forEach((energyChart, index) => {
@@ -261,10 +284,6 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
             energyChart.data.labels.shift();
             energyChart.data.datasets[0].data.shift();
         }
-        charts[nodeName].runningStats.energy.total += energy[index];
-        charts[nodeName].runningStats.energy.count++;
-        const energyAverage = charts[nodeName].runningStats.energy.total / charts[nodeName].runningStats.energy.count;
-        console.log("Average Energy "+ nodeName + " " + energyAverage);
         energyChart.data.labels.push(timestamp);
         energyChart.data.datasets[0].data.push(energy[index]);
         energyChart.update();
