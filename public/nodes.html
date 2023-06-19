@@ -55,14 +55,18 @@
         }
 
     </style>
-    
+    <style>
+        .collapsible-content {
+        display: none; /* Hide the content by default */
+        }
+    </style>
     
 </head>
 <body>
     <h1>Live Node Data</h1>
     <div class="button-Container">
         <button id="Historical-button">Historical Data</button>
-        <a href="http://thesis.local:8090/_/">Database</a>
+        <a id="database-link" href="http://thesis.local:8090/_/">Database</a>
         <button id="logout-button">Logout</button>
     </div>
 
@@ -71,5 +75,16 @@
         <!-- Charts will be generated here -->
     </div>
     <script src="main.js"></script>
+    <script>
+        // Get the current domain
+        const currentDomain = window.location.hostname;
+      
+        // Get the link element by its ID
+        const linkElement = document.getElementById('database-link');
+      
+        // Modify the href attribute with the current domain
+        linkElement.href = linkElement.href.replace('thesis.local', currentDomain);
+      </script>
+
 </body>
 </html>

@@ -9,20 +9,30 @@ import session from 'express-session'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-// docker
-const pb = new PocketBase('http://host.docker.internal:8090');
-const pbURL = 'http://host.docker.internal:8090/_/';
-const mqttBroker = 'mqtt://host.docker.internal:1883';
+// mode 0 is for thesis.local
+// mode 1 is for docker windows
+// mode 2 is for debugging
+// else is for AWS
 
-// localhost
-// const pb = new PocketBase('http://localhost:8090');
-// const pbURL = 'http://localhost:8090/_/';
-// const mqttBroker = 'mqtt://localhost:1883';
+  // //local
+  // const pb = new PocketBase('http://thesis.local:8090');
+  // const pbURL = 'http://thesis.local:8090/_/';
+  // const mqttBroker = 'mqtt://thesis.local:1883';
+  // //windows docker
+  // const pb = new PocketBase('http://host.docker.internal:8090');
+  // const pbURL = 'http://host.docker.internal:8090/_/';
+  // const mqttBroker = 'mqtt://host.docker.internal:1883';
+  // //windows localhost
+  // const pb = new PocketBase('http://localhost:8090');
+  // const pbURL = 'http://localhost:8090/_/';
+  // const mqttBroker = 'mqtt://localhost:1883';
+  //aws
+  const pb = new PocketBase('http://172.31.17.118:8090');
+  const pbURL = 'http://172.31.17.118:8090/_/';
+  const mqttBroker = 'mqtt://172.31.17.118:1883';
 
-// thesis.local
-// const pb = new PocketBase('http://thesis.local:8090');
-// const pbURL = 'http://thesis.local:8090/_/';
-// const mqttBroker = 'mqtt://thesis.local:1883';
+
+
 
 
 const app = express();

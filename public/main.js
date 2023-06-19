@@ -42,14 +42,17 @@ function createCharts(nodeName, relayStatuses) {
     container.setAttribute('data-node-name', nodeName);
 
     container.innerHTML = `
+        <div class="collapsible-container">
         <h2>${nodeName}</h2>
-        <label for="${nodeName}-relay1">Relay 1: </label>
+        
+        <label for="${nodeName}-relay1">Socket 1: </label>
         <input type="checkbox" id="${nodeName}-relay1" class="relay-control" data-node-name="${nodeName}" data-relay-number="1">
-        <label for="${nodeName}-relay2">Relay 2: </label>
+        <label for="${nodeName}-relay2">Socket 2: </label>
         <input type="checkbox" id="${nodeName}-relay2" class="relay-control" data-node-name="${nodeName}" data-relay-number="2">
-        <label for="${nodeName}-relay3">Relay 3: </label>
+        <label for="${nodeName}-relay3">Socket 3: </label>
         <input type="checkbox" id="${nodeName}-relay3" class="relay-control" data-node-name="${nodeName}" data-relay-number="3">        
         <p>Status: ${status}</p>
+        <div class="collapsible-content">
         <div id="${nodeName}-voltage" class="chart"></div>
         <div class="group">
             <div id="${nodeName}-ampere1" class="chart"></div>
@@ -69,7 +72,16 @@ function createCharts(nodeName, relayStatuses) {
             <div id="${nodeName}-power3" class="chart"></div>
             <div id="${nodeName}-energy3" class="chart"></div>
         </div>
+        </div>
+        </div>
     `;
+
+    document.getElementById('charts-container').appendChild(container);
+    const h2 = container.querySelector('h2');
+    const content = container.querySelector('.collapsible-content');
+    h2.addEventListener('click', () => {
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    });
 
     document.getElementById('charts-container').appendChild(container);
 
@@ -189,11 +201,23 @@ function createChart(canvas, label, unit, backgroundColor, borderColor, minY = u
 function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp,relayStatuses, status) {
     const maxDataPoints = 100;
 
+    if (!charts[nodeName].runningStats) {
+        charts[nodeName].runningStats = {
+            voltage: { total: 0, count: 0 },
+            ampere: { total: 0, count: 0 },
+            energy: { total: 0, count: 0 },
+        };
+    }
     const voltageChart = charts[nodeName].voltage;
     if (voltageChart.data.labels.length >= maxDataPoints) {
         voltageChart.data.labels.shift();
         voltageChart.data.datasets[0].data.shift();
     }
+
+    charts[nodeName].runningStats.voltage.total += voltage;
+    charts[nodeName].runningStats.voltage.count++;
+    const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
+    console.log("Average Voltage "+ nodeName + " " + voltageAverage);
     voltageChart.data.labels.push(timestamp);
     voltageChart.data.datasets[0].data.push(voltage);
     voltageChart.update();
@@ -203,6 +227,10 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
             ampereChart.data.labels.shift();
             ampereChart.data.datasets[0].data.shift();
         }
+        charts[nodeName].runningStats.ampere.total += ampere[index];
+        charts[nodeName].runningStats.ampere.count++;
+        const ampereAverage = charts[nodeName].runningStats.ampere.total / charts[nodeName].runningStats.ampere.count;
+        console.log("Average Current "+ nodeName + " " + ampereAverage);
         ampereChart.data.labels.push(timestamp);
         ampereChart.data.datasets[0].data.push(ampere[index]);
         ampereChart.update();
@@ -233,6 +261,10 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
             energyChart.data.labels.shift();
             energyChart.data.datasets[0].data.shift();
         }
+        charts[nodeName].runningStats.energy.total += energy[index];
+        charts[nodeName].runningStats.energy.count++;
+        const energyAverage = charts[nodeName].runningStats.energy.total / charts[nodeName].runningStats.energy.count;
+        console.log("Average Energy "+ nodeName + " " + energyAverage);
         energyChart.data.labels.push(timestamp);
         energyChart.data.datasets[0].data.push(energy[index]);
         energyChart.update();
