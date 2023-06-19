@@ -52,7 +52,6 @@ function createCharts(nodeName, relayStatuses) {
         <label for="${nodeName}-relay3">Socket 3: </label>
         <input type="checkbox" id="${nodeName}-relay3" class="relay-control" data-node-name="${nodeName}" data-relay-number="3">        
         <p>Status: ${status}</p>
-        <p id="${nodeName}-status">Status: ${status}</p>
         <p id="${nodeName}-average-voltage">Average Voltage: </p>
         <p id="${nodeName}-average-current">Average Current: </p>
         <p id="${nodeName}-average-power">Average Power: </p>        
@@ -225,7 +224,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
     charts[nodeName].runningStats.voltage.total += voltage;
     charts[nodeName].runningStats.voltage.count++;
     const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
-    console.log("Average Voltage "+ nodeName + " " + voltageAverage);
+    // console.log("Average Voltage "+ nodeName + " " + voltageAverage);
     const avgVoltageElement = document.getElementById(`${nodeName}-average-voltage`);
     if (avgVoltageElement) {
         avgVoltageElement.innerText = `Average Voltage: ${voltageAverage.toFixed(2)}`;
@@ -243,7 +242,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         charts[nodeName].runningStats.ampere.total += ampere[index];
         charts[nodeName].runningStats.ampere.count++;
         const ampereAverage = charts[nodeName].runningStats.ampere.total / charts[nodeName].runningStats.ampere.count;
-        console.log("Average Current "+ nodeName + " " + ampereAverage);
+        // console.log("Average Current "+ nodeName + " " + ampereAverage);
         const avgcurrentElement = document.getElementById(`${nodeName}-average-current`);
         if (avgcurrentElement) {
             avgcurrentElement.innerText = `Average Current: ${ampereAverage.toFixed(2)}`;
@@ -272,7 +271,7 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
         charts[nodeName].runningStats.power.total += power[index];
         charts[nodeName].runningStats.power.count++;
         const powerAverage = charts[nodeName].runningStats.power.total / charts[nodeName].runningStats.power.count;
-        console.log("Average power "+ nodeName + " " + powerAverage);
+        // console.log("Average power "+ nodeName + " " + powerAverage);
         const avgpowerElement = document.getElementById(`${nodeName}-average-power`);
         if (avgpowerElement) {
             avgpowerElement.innerText = `Average Power: ${powerAverage.toFixed(2)}`;
