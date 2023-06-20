@@ -95,7 +95,12 @@ function createCharts(nodeName, relayStatuses) {
     container.setAttribute('data-node-name', nodeName);
 
     container.innerHTML = `
+        <div class="collapsible-container">
         <h2>${nodeName}</h2>
+        <p id="${nodeName}-average-voltage">Average Voltage: </p>
+        <p id="${nodeName}-average-current">Average Current: </p>
+        <p id="${nodeName}-average-power">Average Power: </p>        
+        <div class="collapsible-content">
         <div id="${nodeName}-voltage" class="chart"></div>
         <div class="group">
             <div id="${nodeName}-ampere1" class="chart"></div>
@@ -115,7 +120,10 @@ function createCharts(nodeName, relayStatuses) {
             <div id="${nodeName}-power3" class="chart"></div>
             <div id="${nodeName}-energy3" class="chart"></div>
         </div>
+        </div>
+        </div>
     `;
+
 
     document.getElementById('charts-container').appendChild(container);
 
@@ -159,61 +167,94 @@ function createCharts(nodeName, relayStatuses) {
 }
 
 
-function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp, relayStatuses, status) {
-    const maxDataPoints = 60 * 60; // 60 messages per minute * 60 minutes per hour
-    const timezoneOffset = 0; // GMT+8 offset in milliseconds
-    const date = new Date(timestamp);
-    date.setTime(date.getTime() + timezoneOffset);
-  
-    const voltageChart = charts[nodeName].voltage;
-    if (voltageChart.data.labels.length >= maxDataPoints) {
+function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, timestamp,relayStatuses, status) {
+  const maxDataPoints = 100;
+
+  if (!charts[nodeName].runningStats) {
+      charts[nodeName].runningStats = {
+          voltage: { total: 0, count: 0 },
+          ampere: { total: 0, count: 0 },
+          power: { total: 0, count: 0 },
+      };
+  }
+  const voltageChart = charts[nodeName].voltage;
+  if (voltageChart.data.labels.length >= maxDataPoints) {
       voltageChart.data.labels.shift();
       voltageChart.data.datasets[0].data.shift();
-    }
-    voltageChart.data.labels.push(date);
-    voltageChart.data.datasets[0].data.push(voltage);
-    voltageChart.update();
-  
-    charts[nodeName].ampere.forEach((ampereChart, index) => {
+  }
+
+  voltageChart.data.labels.push(timestamp);
+  voltageChart.data.datasets[0].data.push(voltage);
+  voltageChart.update();
+
+  charts[nodeName].runningStats.voltage.total += voltage;
+  charts[nodeName].runningStats.voltage.count++;
+  const voltageAverage = charts[nodeName].runningStats.voltage.total / charts[nodeName].runningStats.voltage.count;
+  // console.log("Average Voltage "+ nodeName + " " + voltageAverage);
+  const avgVoltageElement = document.getElementById(`${nodeName}-average-voltage`);
+  if (avgVoltageElement) {
+      avgVoltageElement.innerText = `Average Voltage: ${voltageAverage.toFixed(2)}`;
+  }
+
+  charts[nodeName].ampere.forEach((ampereChart, index) => {
       if (ampereChart.data.labels.length >= maxDataPoints) {
-        ampereChart.data.labels.shift();
-        ampereChart.data.datasets[0].data.shift();
+          ampereChart.data.labels.shift();
+          ampereChart.data.datasets[0].data.shift();
       }
-      ampereChart.data.labels.push(date);
+      ampereChart.data.labels.push(timestamp);
       ampereChart.data.datasets[0].data.push(ampere[index]);
       ampereChart.update();
-    });
-  
-    charts[nodeName].phaseAngle.forEach((phaseAngleChart, index) => {
-      if (phaseAngleChart.data.labels.length >= maxDataPoints) {
-        phaseAngleChart.data.labels.shift();
-        phaseAngleChart.data.datasets[0].data.shift();
+
+      charts[nodeName].runningStats.ampere.total += ampere[index];
+      charts[nodeName].runningStats.ampere.count++;
+      const ampereAverage = charts[nodeName].runningStats.ampere.total / charts[nodeName].runningStats.ampere.count;
+      // console.log("Average Current "+ nodeName + " " + ampereAverage);
+      const avgcurrentElement = document.getElementById(`${nodeName}-average-current`);
+      if (avgcurrentElement) {
+          avgcurrentElement.innerText = `Average Current: ${ampereAverage.toFixed(2)}`;
       }
-      phaseAngleChart.data.labels.push(date);
+  });
+
+  charts[nodeName].phaseAngle.forEach((phaseAngleChart, index) => {
+      if (phaseAngleChart.data.labels.length >= maxDataPoints) {
+          phaseAngleChart.data.labels.shift();
+          phaseAngleChart.data.datasets[0].data.shift();
+      }
+      phaseAngleChart.data.labels.push(timestamp);
       phaseAngleChart.data.datasets[0].data.push(phaseAngle[index]);
       phaseAngleChart.update();
-    });
-  
-    charts[nodeName].power.forEach((powerChart, index) => {
+  });
+
+  charts[nodeName].power.forEach((powerChart, index) => {
       if (powerChart.data.labels.length >= maxDataPoints) {
-        powerChart.data.labels.shift();
-        powerChart.data.datasets[0].data.shift();
+          powerChart.data.labels.shift();
+          powerChart.data.datasets[0].data.shift();
       }
-      powerChart.data.labels.push(date);
+      powerChart.data.labels.push(timestamp);
       powerChart.data.datasets[0].data.push(power[index]);
       powerChart.update();
-    });
-  
-    charts[nodeName].energy.forEach((energyChart, index) => {
-      if (energyChart.data.labels.length >= maxDataPoints) {
-        energyChart.data.labels.shift();
-        energyChart.data.datasets[0].data.shift();
+
+      charts[nodeName].runningStats.power.total += power[index];
+      charts[nodeName].runningStats.power.count++;
+      const powerAverage = charts[nodeName].runningStats.power.total / charts[nodeName].runningStats.power.count;
+      // console.log("Average power "+ nodeName + " " + powerAverage);
+      const avgpowerElement = document.getElementById(`${nodeName}-average-power`);
+      if (avgpowerElement) {
+          avgpowerElement.innerText = `Average Power: ${powerAverage.toFixed(2)}`;
       }
-      energyChart.data.labels.push(date);
+  });
+
+  charts[nodeName].energy.forEach((energyChart, index) => {
+      if (energyChart.data.labels.length >= maxDataPoints) {
+          energyChart.data.labels.shift();
+          energyChart.data.datasets[0].data.shift();
+      }
+      energyChart.data.labels.push(timestamp);
       energyChart.data.datasets[0].data.push(energy[index]);
       energyChart.update();
-    });
-  }
+  });
+}
+
 
   document.getElementById('logout-button').addEventListener('click', async () => {
     try {
