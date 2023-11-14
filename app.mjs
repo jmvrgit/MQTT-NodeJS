@@ -9,30 +9,10 @@ import session from 'express-session'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-// mode 0 is for thesis.local
-// mode 1 is for docker windows
-// mode 2 is for debugging
-// else is for AWS
 
-  // //local
-  // const pb = new PocketBase('http://thesis.local:8090');
-  // const pbURL = 'http://thesis.local:8090/_/';
-  // const mqttBroker = 'mqtt://thesis.local:1883';
-  // //windows docker
-  // const pb = new PocketBase('http://host.docker.internal:8090');
-  // const pbURL = 'http://host.docker.internal:8090/_/';
-  // const mqttBroker = 'mqtt://host.docker.internal:1883';
-  // //windows localhost
-  // const pb = new PocketBase('http://localhost:8090');
-  // const pbURL = 'http://localhost:8090/_/';
-  // const mqttBroker = 'mqtt://localhost:1883';
-  //aws
-  const pb = new PocketBase('http://172.31.17.118:8090');
-  const pbURL = 'http://172.31.17.118:8090/_/';
-  const mqttBroker = 'mqtt://172.31.17.118:1883';
-
-
-
+const pb = new PocketBase('http://pocketbase:8090');
+const pbURL = 'http://pocketbase:8090/_/';
+const mqttBroker = 'mqtt://mqtt:1883';
 
 
 const app = express();
@@ -113,30 +93,30 @@ app.get('/', ensureAuthenticated, (req, res) => {
     res.sendFile('login.html', { root: __dirname + '/public' });
 });
 
+
 // Serve login.html for the /login route
 app.get('/login', (req, res) => {
-    // Check database connection
-    // axios.get('http://host.docker.internal:8090/_/')
-    // axios.get('http://localhost:8090/_/')
-    axios.get(pbURL)
-      .then(() => {
-        // Database is up, send login page
-        res.sendFile('login.html', { root: __dirname + '/public' });
-      })
-      .catch(() => {
-        // Database is down, send error message
-        res.status(500).send('Database is currently down. Make sure that the database is up.');
-      });
+  // Check database connection
+  // axios.get('http://host.docker.internal:8090/_/')
+  // axios.get('http://localhost:8090/_/')
+  axios.get(pbURL)
+    .then(() => {
+      // Database is up, send login page
+      res.sendFile('login.html', { root: __dirname + '/public' });
+    })
+    .catch(() => {
+      // Database is down, send error message
+      res.status(500).send('Database is currently down. Make sure that the database is up.');
+    });
 });
 
 app.post('/login', async (req, res, next) => {
   const { username, password } = req.body;
   try {
       const authData = await pb.collection('users').authWithPassword(username, password);
-      //console.log('Auth data:', authData);
-      req.login(authData, (err) => { // Change authData.model to authData
+      req.session.isAdmin = authData.isAdmin; // Set isAdmin field to session
+      req.login(authData, (err) => {
           if (err) {
-              // console.log(err)
               return next(err);
           }
           return res.redirect('/home');
@@ -145,6 +125,10 @@ app.post('/login', async (req, res, next) => {
       console.log(error)
       res.redirect('/login');
   }
+});
+
+app.get('/isAdmin', (req, res) => {
+  res.json({isAdmin: req.session.isAdmin});
 });
 
 http.listen(port, () => {

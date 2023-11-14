@@ -2,6 +2,12 @@ const socket = io();
 const charts = {};
 const lastReceivedData = new Map();
 
+function userIsAdmin() {
+    return fetch('/isAdmin')
+        .then(response => response.json())
+        .then(data => data.isAdmin);
+}
+
 function updateChartContainerBorder() {
     const oneMinute = 3000; // three seconds
     const tenMinutes = 2 * oneMinute;
@@ -12,24 +18,22 @@ function updateChartContainerBorder() {
         const nodeNameElement = container.querySelector('h2');
         const relayCheckboxes = container.querySelectorAll('.relay-control');
 
+        relayCheckboxes.forEach(checkbox => {
+            if (userIsAdmin()) {
+                checkbox.disabled = true;
+            }
+            });
+
         if (now - lastTimestamp >= tenMinutes) {
             container.style.border = '2px solid grey';
             nodeNameElement.innerHTML = `${nodeName} (Disconnected)`;
-            // relayCheckboxes.forEach(checkbox => {
-            //     checkbox.disabled = true;
-            // });
         } else if (now - lastTimestamp >= oneMinute) {
             container.style.border = '2px solid red';
             nodeNameElement.innerHTML = nodeName;
-            // relayCheckboxes.forEach(checkbox => {
-            //     checkbox.disabled = false;
-            // });
         } else {
             container.style.border = '2px solid green';
             nodeNameElement.innerHTML = nodeName;
-            // relayCheckboxes.forEach(checkbox => {
-            //     checkbox.disabled = false;
-            // });
+
         }
     });
 }
@@ -86,7 +90,7 @@ function createCharts(nodeName, relayStatuses) {
         content.style.display = content.style.display === 'none' ? 'block' : 'none';
     });
 
-    document.getElementById('charts-container').appendChild(container);
+    // document.getElementById('charts-container').appendChild(container);
 
     const voltageCanvas = createCanvas(`${nodeName}-voltage`);
     const ampereCanvas1 = createCanvas(`${nodeName}-ampere1`);
