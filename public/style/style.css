@@ -1,0 +1,69 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffc20f; /* Base color as background */
+  font-family: 'Roboto', sans-serif; /* Applying Roboto font */
+}
+
+a {
+  color: #000; /* Dark color for contrast */
+  text-decoration: none;
+  margin: 10px;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+}
+
+a img {
+  height: 20px; /* Adjust as needed */
+  width: auto;
+  margin-right: 8px;
+}
+
+#login-form {
+  text-align: center;
+  padding: 20px;
+  background-color: white; /* White background for form */
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+#login-Image img {
+  width: 200px; /* Adjust as needed */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+input[type="text"], input[type="password"] {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #000; /* Dark color for contrast */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #333; /* Darker shade on hover */
+}
+
+h2 {
+  color: #333;
+}
+
+.collapsible-content {
+  display: none; /* Hide the content by default */
+  }

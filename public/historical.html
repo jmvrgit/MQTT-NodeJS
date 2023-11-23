@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="./chart.min.js"></script>
-    <script src="./chartjs-adapter-date-fns.bundle.min.js"></script>
-    
+    <script src="./js/chart.min.js"></script>
+    <script src="./js/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/style.css">
     <title>Historical Data</title>
     <style>
          body {
@@ -16,7 +17,7 @@
         }
         
         h1 {
-            background-color: #4CAF50;
+            background-color: #ffc20f;
             color: white;
             display: flex;
             align-items: center;
@@ -33,7 +34,11 @@
             padding: 1rem;
             margin: 1rem;
         }
-        
+        a img {
+        height: 20px; /* Adjust as needed */
+        width: auto;
+        margin-right: 8px;
+        }
         .group {
             display: flex;
             flex-direction: column;
@@ -73,6 +78,9 @@
     </script>
 </head>
 <body>
+    <a href="pocketbase/_/"><img src="logos/pb_logo.png" alt="Pocketbase Logo">Pocketbase</a>
+    <a href="grafana/"><img src="logos/grafana_logo.png" alt="Grafana Logo">Grafana</a>
+    <a href="victoriametrics/"><img src="logos/vmui_logo.png" alt="Victoriametrics Logo">Victoriametrics</a>
     <h1>Historical Node Data</h1>
     <div class="button-Container">
         <input type="datetime-local" id="startDateInput">
@@ -85,7 +93,7 @@
     <div id="charts-container">
         <!-- Charts will be generated here -->
     </div>
-    <script src="historical.js"></script>
+    <script src="/js/historical.js"></script>
 </body>
 </html>
 

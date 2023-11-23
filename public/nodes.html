@@ -5,86 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT Charts</title>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="./chart.min.js"></script>
-    <script src="./chartjs-adapter-date-fns.bundle.min.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        
-        h1 {
-            background-color: #4CAF50;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            margin-bottom: 2rem;   
-        }
-        
-        .chart-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 2px solid green;
-            padding: 1rem;
-            margin: 1rem;
-        }
-        
-        .group {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 100%;
-            margin: 2rem 0;
-            margin-bottom: 20%;
-            
-        }
-        
-        .chart {
-            width: 100%;
-        }
-
-        .button-Container {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        }
-
-    </style>
-    <style>
-        .collapsible-content {
-        display: none; /* Hide the content by default */
-        }
-    </style>
-    
+    <script src="./js/chart.min.js"></script>
+    <script src="./js/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-    <h1>Live Node Data</h1>
+
+    <h1>Live Monitoring Data</h1>
     <div class="button-Container">
-        <button id="Historical-button">Historical Data</button>
-        <a id="database-link" href="http://thesis.local:8090/_/">Database</a>
+        <a href="pocketbase/_/"><img src="logos/pb_logo.png" alt="Pocketbase Logo">Pocketbase</a>
+        <a href="grafana/"><img src="logos/grafana_logo.png" alt="Grafana Logo">Grafana</a>
+        <a href="victoriametrics/"><img src="logos/vmui_logo.png" alt="Victoriametrics Logo">Victoriametrics</a>
         <button id="logout-button">Logout</button>
     </div>
 
-    
     <div id="charts-container">
         <!-- Charts will be generated here -->
     </div>
-    <script src="main.js"></script>
-    <script>
-        // Get the current domain
-        const currentDomain = window.location.hostname;
-      
-        // Get the link element by its ID
-        const linkElement = document.getElementById('database-link');
-      
-        // Modify the href attribute with the current domain
-        linkElement.href = linkElement.href.replace('thesis.local', currentDomain);
-      </script>
 
+    <script src="./js/main.js"></script>
 </body>
 </html>
