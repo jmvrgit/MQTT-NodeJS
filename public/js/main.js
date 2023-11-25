@@ -19,10 +19,10 @@ function updateChartContainerBorder() {
         const relayCheckboxes = container.querySelectorAll('.relay-control');
 
         relayCheckboxes.forEach(checkbox => {
-            // if (userIsAdmin()) {
-            //     // checkbox.disabled = true;
-            // }
-            // });
+            if (userIsAdmin()) {
+                checkbox.disabled = true;
+            }
+            });
 
         if (now - lastTimestamp >= tenMinutes) {
             container.style.border = '2px solid grey';
@@ -299,9 +299,9 @@ function updateCharts(nodeName, voltage, ampere, phaseAngle, power, energy, time
 
     // comment out when testing so that you can test the relay even when blacked out
     const relayCheckboxes = container.querySelectorAll('.relay-control');
-    // relayCheckboxes.forEach(checkbox => {
-    // // checkbox.disabled = status !== 'normal';
-    // });
+    relayCheckboxes.forEach(checkbox => {
+    checkbox.disabled = status !== 'normal';
+    });
 
     relayStatuses.forEach((relayStatus, index) => {
         const relaySwitch = document.querySelector(`#${nodeName}-relay${index + 1}`);
